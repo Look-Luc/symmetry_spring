@@ -477,9 +477,11 @@ function StartExperiment() {
   $('.container').show();
   $('#container_main').show();
   //load changePrompt
+  changePrompts();
   // load first trial
   loadTrial();
   //add response type
+  Responded(keyCodes);
 }
 
 
