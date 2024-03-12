@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<!-- Original script created by Alon Hafri, March 2021
+-->
+
+<html>
+
+  <head>
+    <title>Word Association</title>
+
+    <script src="helper_files/jquery.min.js"></script>
+		<script src="helper_files/mturkfunctions.js"></script>
+
+    <!-- Import HeadphoneCheck.js -->
+    <script type="text/javascript" src="headphoneCheck/HeadphoneCheck.min.js"></script>
+    <!-- Import HeadphoneCheck.css -->
+    <link rel="stylesheet" type="text/css" href="headphoneCheck/HeadphoneCheckStyle.css">
+
+    <script src="word_assoc_auditory_v002.js"></script>
+    <link rel="stylesheet" type="text/css" href="word_assoc_auditory_v002.css">
+  </head>
+
+  <body>
+    <div id="title"><strong>Word Association</strong></div>
+
+    <div id="consent">
+      <div id="consent-title"><strong>Consent</strong></div>
+      <div id="consent-text">
+        <!-- <p>By completing this survey, you are consenting to be in this research study. The data we collect is completely anonymous. Your participation is voluntary and you can stop at any time. If you are ready, click the check box below to indicate your consent. When image files are loaded, you can click the button to start.</p> -->
+
+        <p>
+            This is an experiment in which you will be asked to watch short videos and answer brief questions
+            about them. It should take around 8-10 minutes to complete and you will receive 0.5 credits for your time.
+            <br><br>
+            <strong>Note that you will need to wear headphones or earbuds during the study, so please put them in now. (It must be headphones or earbuds; computer speakers are not sufficient.)</strong>
+            <br><br>
+            This experiment is part of a series of studies being conducted by a member of the Cognitive
+            Science department at the Johns Hopkins University, and has been approved by the University's
+            Institutional Review Board. Please click <a href="Adult Consent English 03-2016.pdf" target="_blank">here to review the informed consent information for
+            participants in this study</a>; this document contains the Johns Hopkins IRB's seal of approval.
+            <br><br>
+            Checking "I agree to participate" below indicates that:
+            <ul>
+              <li>You have downloaded and read the informed consent document.</li>
+              <li>You voluntarily agree to participate.</li>
+              <li>You are at least 18 years of age.</li>
+              <li>You are a native speaker of English (i.e. English was (one of) the primary language(s) you
+              spoke growing up).</li>
+              <li>You have normal or corrected-to-normal vision.</li>
+              <li>You have normal or corrected-to-normal hearing.</li>
+              <li>You have not participated in this study before.</li>
+            </ul>
+            <br>
+            If you do not agree to all of these, please close this window in your browser now.
+        </p>
+
+
+        <label><input type="checkbox" name="consentBox" id="consentBox" value="value" onclick="validate()">I agree to participate.</label>
+
+        <div id="consentButton" class="clickButton">
+          <a href="javascript:ClickedConsent()" class="clickButton_text" id="consentButtonText">Loading images, please wait...</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="hc-container"></div>
+
+    <div id="experiment">
+      <span id="instructions">
+        <div class="instr" id="Instruction">
+          <p>In this study, you will choose which of two phrases best describes a video.</p>
+
+          <p>On each trial, you will watch a video in which two shapes will move. The video will repeat once. Then two phrases will be displayed.</p>
+
+          <p><strong>Your job is to choose which phrase you think best matches the video. There is no correct or incorrect answer. <em>Go with your gut!</em></strong></p>
+
+          <p><strong>Also, sometimes you will hear sound during the videos, so it is important you keep your headphones on at normal volume during the study, and do not listen to anything else, like music.</strong></p>
+
+          <p>The whole study will only take about 8-10 minutes; please stay focused!</p>
+
+          <p>If you are ready, click "Start Experiment".</p>
+
+        </div>
+      </span>
+
+      <div id="startExperimentButton" class="clickButton">
+        <a href="javascript:StartExperiment()" class="clickButton_text" id="startExperimentText">Start Experiment</a>
+      </div>
+
+      <div id="progressContainer">
+        <div class="progress" id="progressText">Study Progress</div>
+        <div class="progress" id="progressOutline">
+          <div class="progress" id="progressBar"></div>
+        </div>
+      </div>
+
+      <div class="container" id="container_main">
+        <canvas id="myCanvas"></canvas>
+      </div>
+
+      <div id="responseGroup">
+        <div id="probeQ">Which phrase better describes the video?</div>
+        <div id="responseText"></div>
+      </div>
+    </div>
+
+    <div class="doneTextStyle_lang" id="lang-q">
+      <p><strong>Done! Before submitting, please answer a few quick questions on this page and the next page.</strong></p>
+      <p>(Please be honest! You will be allowed to submit the study regardless of your responses.)</p>
+      <br>
+      <p>1. Are you a native speaker of English? In other words:</p>
+      <li>You learned English fluently from birth</li>
+      <li>You are a fluent speaker of English</li>
+      <div id="radiogroup_langEng">
+        <input class="radio" type="radio" name="langEng_native" value="yes">Yes
+        <input class="radio" type="radio" name="langEng_native" value="no">No
+        <input class="radio" type="radio" name="langEng_native" value="not_sure">Not sure
+      </div>
+      <br>
+      <p>2. Are you a native speaker of any other language <em>besides</em> English? In other words:</p>
+      <li>You learned that language fluently from birth</li>
+      <li>You are a fluent speaker of that language</li>
+      <div id="radiogroup_langOther">
+        <input class="radio" type="radio" name="langOther_native" value="yes">Yes
+        <input class="radio" type="radio" name="langOther_native" value="no">No
+        <input class="radio" type="radio" name="langOther_native" value="not_sure">Not sure
+      </div>
+      <br>
+      <p>3. What language do you currently use most?:</p>
+      <div id="radiogroup_primaryLang">
+        <input class="radio" type="radio" name="langPrimary" value="English">English
+        <input class="radio" type="radio" name="langPrimary" value="Other">Other
+      </div>
+      <br>
+      <br><br>
+      <input type="submit" id="submitLangQButton" name="submitLangQButton" value="Finished with language questions" onclick='showPostQ()'>
+    </div>
+
+    <div class="doneTextStyle" id="post-q">
+      <strong>Done! After you answer the below questions, you will be brought to the submission page:</strong>
+      <br><br>
+      <p> 1. How did you decide which phrase best matched the video? </p>
+      <textarea id="postQ_strategy" row=2 cols=40 placeholder="When the video was... I chose the phrase that..."></textarea>
+      <br><br>
+      <p> 2. Sometimes a beep played during the videos, and sometimes it did not. How do you think the presence of these beeps affected what you saw happen in the videos? (Just guess, do your best!) </p>
+      <textarea id="postQ_stimTypes" row=2 cols=40 placeholder="When the beep played... When the beep didn't play..."></textarea>
+      <br><br>
+      <p> 3. In each trial, there were two kinds of phrases that you had to choose from. How would you describe them? (Just guess, do your best!) </p>
+      <textarea id="postQ_phraseTypes" row=2 cols=40 placeholder="One kind was... The other kind was..."></textarea>
+      <br><br>
+      <input type="submit" id="submitPostQButton" name="submitPostQButton" value="Finished with questions" onclick='showSubmitInstructions()'>
+    </div>
+
+    <div class="doneTextStyle" id="submitText">
+      <strong>Click the button below to submit your results, and then you will be redirected back to SYSTEM's webpage where you will be given a completion code. Thank you!</strong>
+      <br><p>Also, feel free to leave any comments below about how the experiment went. Did everything seem to work okay?</p>
+      <textarea id="commentBox" row=4 cols=40 placeholder="Enter you comments here..."></textarea>
+      <!-- <input type="hidden" id="comments" name="comments"><br><br> -->
+      <input type="submit" id="submitButton" name="submitButton" value="Submit results" onclick='clickSubmitRedirect()'>
+    </div>
+    <div class="doneTextStyle" id="redirect">
+      <p>Your browser should automatically redirect you to SYSTEM's webpage where you will be given a completion code.</p>
+      <p>Redirecting in <span id="countDown"><b></b></span> seconds.</p>
+      <p>If you're not automatically redirected in a few seconds, please click the below link, or copy and paste the address into your web browser:
+      <br>
+      <b><a id="urlRedirect" href=""></a></b>
+    </div>
+
+  </body>
+
+
+  <!-- //////////////////////////// -->
+  <!-- //////////////////////////// -->
+  <!-- //////////////////////////// -->
+
+  <script>
+
+    function validate() {
+     if ( $('#consentBox').is(":checked") ) {
+       $('#consentButton').show();
+     } else {
+       $('#consentButton').hide();
+     }
+    }
+
+    // when the document has loaded
+    $(document).ready(introRoutines);
+
+  </script>
+
+</html>
+
+<!-- END OF HTML -->
