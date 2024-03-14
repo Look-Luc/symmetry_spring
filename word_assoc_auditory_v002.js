@@ -45,8 +45,8 @@ var experimentNotes = 'matching symmetrical predicates to audiovisual illusory b
 // response key params
 var keyCodes = [70, 74]; // f, j
 var keys = ['f','j']; // should match order of keyboard keys above
-responses = ["bounce", "stream"];
-var responseAssignment = Shuffle[0,1];
+responseOptions = ["bounce", "stream"];
+var responseAssignments = Shuffle([0,1]);
 
 // durations of each trial element
 var durations = {};
@@ -539,7 +539,7 @@ function changePrompts() {
   words[0] = trial['wordPair'][trial['wordOrder'][0]];
   words[1] = trial['wordPair'][trial['wordOrder'][1]];
   
-  $('#responseText').html('<strong>' + keys[0].toUpperCase() + ' = </strong>bounce' + '<br><strong>' + keys[1].toUpperCase() + ' = </strong>stream' + '');
+  $('#responseText').html('<strong>' + keys[0].toUpperCase() + ' = </strong>' + responseOptions[responseAssignments[0]] + '<br><strong>' + keys[1].toUpperCase() + ' = </strong>' + responseOptions[responseAssignments[1]] + '');
 }
 
 
