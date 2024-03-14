@@ -477,7 +477,7 @@ function StartExperiment() {
   $('.container').show();
   $('#container_main').show();
   //load changePrompt
-  //changePrompts();
+  changePrompts();
   // load first trial
   loadTrial();
   //add response type
@@ -511,7 +511,7 @@ function runTrial() {
   // update progress bar
   $('#progressBar').css('width',((currentTrialNum/nTrials)*100) + 'px');
   // begin trial dynamics
-  changePrompts();
+  //changePrompts();
   // initial positions
   x = [...x_initial];
   y = [canvasHeight/2, canvasHeight/2];
@@ -533,11 +533,11 @@ function prepSound() {
 
 function changePrompts() {
   // decide randomly which key is which (sym or non-sym)
-  trial['wordOrder'] = Shuffle(['sym','non-sym']);
+  //trial['wordOrder'] = Shuffle(['sym','non-sym']);
   // grab words
-  words = [];
-  words[0] = trial['wordPair'][trial['wordOrder'][0]];
-  words[1] = trial['wordPair'][trial['wordOrder'][1]];
+  //words = [];
+  //words[0] = trial['wordPair'][trial['wordOrder'][0]];
+  //words[1] = trial['wordPair'][trial['wordOrder'][1]];
   
   $('#responseText').html('<strong>' + keys[0].toUpperCase() + ' = </strong>' + responseOptions[responseAssignments[0]] + '<br><strong>' + keys[1].toUpperCase() + ' = </strong>' + responseOptions[responseAssignments[1]] + '');
 }
