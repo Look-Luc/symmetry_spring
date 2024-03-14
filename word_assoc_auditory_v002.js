@@ -668,6 +668,7 @@ function Responded(keyCode) {
     trial['experimentCondition'] = experimentCondition;
 
     // code reponses
+    /*
     if ( (trial['respType'] == 'sym' & trial['stimType'] == 'sym') | (trial['respType'] == 'non-sym' & trial['stimType'] == 'non-sym') ) {
       trial['respMatch'] = 1;
     } else {
@@ -685,7 +686,7 @@ function Responded(keyCode) {
     trial['itemGroup'] = trial['wordPair']['itemGroup'];
     trial['wordOrder'] = trial['wordOrder'].toString();
     delete trial['wordPair'];
-
+    */
     // push trial info and recorded data to responses object
     responses['trialData'].push(trial);
 
