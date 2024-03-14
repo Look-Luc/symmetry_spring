@@ -685,8 +685,8 @@ function Responded(keyCode) {
     trial['non-sym'] = trial['wordPair']['non-sym'];
     trial['itemGroup'] = trial['wordPair']['itemGroup'];
     trial['wordOrder'] = trial['wordOrder'].toString();
-    delete trial['wordPair'];
     */
+    delete trial['wordPair'];
     // push trial info and recorded data to responses object
     responses['trialData'].push(trial);
 
