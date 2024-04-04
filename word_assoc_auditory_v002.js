@@ -197,6 +197,22 @@ var AudioContext = window.AudioContext // Default
     || window.webkitAudioContext // Safari and old versions of Chrome
     || false;
 
+///////////////////
+// experiment flow
+
+//instruction details
+var numInstr;
+var instrInd = 0; // instruction to start at
+var enableInstrButtons = true; // for animating the showing/hiding of instructions screen buttons
+var curInstrImg;
+// images for the instructions screen (for pre-loading)
+var imageList_instr = [
+  mediaDir + instrImageDir + 'on_on' + imageExt,
+  mediaDir + instrImageDir + 'on_below' + imageExt,
+  mediaDir + instrImageDir + 'below_on' + imageExt
+];
+var instr_dispImages = [0, 0, 1, 2, '', '']; // which instructions screens to show images on (and which ones; index refers to elements in imageList_instr)
+
 /*************************
 *   Initial Functions    *
 **************************/
@@ -620,7 +636,12 @@ function animEvent() {
   //   oscDisconnected = true;
   // }
   // update positions
-  x = [x_initial[0] + v_pxPerMS * t_elapsed, x_initial[1] - v_pxPerMS * t_elapsed];
+  if (t_elapsed < t_collision) {
+    x = [x_initial[0] + v_pxPerMS * t_elapsed, x_initial[1] - v_pxPerMS * t_elapsed];
+  } else if (t_elapsed > t_collision & trial['stimType'] == 'sym') {
+    x = [x_initial[0] - v_pxPerMS * t_elapsed, x_initial[1] + v_pxPerMS * t_elapsed]; 
+  }
+
   // next frame or move on
   if (t_elapsed < t_end) {
     requestAnimationFrame(animEvent);
