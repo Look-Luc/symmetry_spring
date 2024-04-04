@@ -290,7 +290,7 @@ function generateTrials() {
     for (b = 0; b < shapeTypes.length; b++) {
       for (c = 0; c < angles.length; c++) {
         curVidCombo = {};
-        curVidCombo['fillColor'] = fillColorNames[a];
+        curVidCombo['fillColor'] = [fillColorNames[a], fillColorNames[a]];
         curVidCombo['shapeType'] = shapeTypes[b];
         curVidCombo['angle'] = angles[c];
         vidCombos.push(curVidCombo);
@@ -324,6 +324,9 @@ function generateTrials() {
       // if ( [currentStimCondition[0][iiB], currentStimCondition[1][iiB]].includes(wordCombos[iiWP]['itemGroup']) ) {
         curTrial = {};
 
+        // test trial not practice
+        curTrial['trialType'] = 'test';
+
         curTrial['blockNum'] = iiB;
         curTrial['wordPair'] = wordCombos[iiWP];
 
@@ -343,6 +346,16 @@ function generateTrials() {
     Shuffle(curBlock);
     trials = trials.concat(curBlock);
   };
+
+  // now add practice trials
+  practice_trials = [
+    {'trialType': 'practice', 'blockNum': 0, 'stimType': 'sym', 'fillColor': [fillColorNames[0], fillColorNames[1]], 'shapeType': 'oval', 'angle': 0},
+    {'trialType': 'practice', 'blockNum': 0, 'stimType': 'sym', 'fillColor': [fillColorNames[0], fillColorNames[1]], 'shapeType': 'rect', 'angle': 45},
+    {'trialType': 'practice', 'blockNum': 0, 'stimType': 'non-sym', 'fillColor': [fillColorNames[0], fillColorNames[1]], 'shapeType': 'oval', 'angle': 90},
+    {'trialType': 'practice', 'blockNum': 0, 'stimType': 'non-sym', 'fillColor': [fillColorNames[0], fillColorNames[1]], 'shapeType': 'rect', 'angle': 135}    
+  ]
+  Shuffle(practice_trials);
+  trials = trials.concat(practice_trials);
 
   return trials;
 };
@@ -608,14 +621,14 @@ function animEvent() {
   ctx.rotate(Math.PI / 180 * (trial['angle'])); // rotate the canvas
   if (trial['shapeType'] == 'oval') {
     // 1
-    drawCircle(x[0]-canvasWidth/2, y[0]-canvasHeight/2, radius, fillColors[ trial['fillColor'] ]);
+    drawCircle(x[0]-canvasWidth/2, y[0]-canvasHeight/2, radius, fillColors[ trial['fillColor'][0] ]);
     // 2
-    drawCircle(x[1]-canvasWidth/2, y[1]-canvasHeight/2, radius, fillColors[ trial['fillColor'] ]);
+    drawCircle(x[1]-canvasWidth/2, y[1]-canvasHeight/2, radius, fillColors[ trial['fillColor'][1] ]);
   } else {
     // 1
-    drawRect(radius*2, radius*2, x[0]-radius-canvasWidth/2, y[0]-radius-canvasHeight/2, fillColors[ trial['fillColor'] ]);
+    drawRect(radius*2, radius*2, x[0]-radius-canvasWidth/2, y[0]-radius-canvasHeight/2, fillColors[ trial['fillColor'][0] ]);
     // 2
-    drawRect(radius*2, radius*2, x[1]-radius-canvasWidth/2, y[1]-radius-canvasHeight/2, radius, fillColors[ trial['fillColor'] ]);
+    drawRect(radius*2, radius*2, x[1]-radius-canvasWidth/2, y[1]-radius-canvasHeight/2, radius, fillColors[ trial['fillColor'][1] ]);
   }
   ctx.restore();
   // time elapsed since animation start
