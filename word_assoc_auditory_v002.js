@@ -621,11 +621,7 @@ function animEvent() {
   //   oscDisconnected = true;
   // }
   // update positions
-  if (t_elapsed < t_collision) {
-    x = [x_initial[0] + v_pxPerMS * t_elapsed, x_initial[1] - v_pxPerMS * t_elapsed];
-  } else if (t_elapsed > t_collision & trial['stimType'] == 'sym') {
-    x = [x_initial[0] - v_pxPerMS * t_elapsed, x_initial[1] + v_pxPerMS * t_elapsed]; 
-  }
+  x = [x_initial[0] + v_pxPerMS * t_elapsed, x_initial[1] - v_pxPerMS * t_elapsed];
 
   // next frame or move on
   if (t_elapsed < t_end) {
