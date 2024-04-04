@@ -197,21 +197,6 @@ var AudioContext = window.AudioContext // Default
     || window.webkitAudioContext // Safari and old versions of Chrome
     || false;
 
-///////////////////
-// experiment flow
-
-//instruction details
-var numInstr;
-var instrInd = 0; // instruction to start at
-var enableInstrButtons = true; // for animating the showing/hiding of instructions screen buttons
-var curInstrImg;
-// images for the instructions screen (for pre-loading)
-var imageList_instr = [
-  mediaDir + instrImageDir + 'on_on' + imageExt,
-  mediaDir + instrImageDir + 'on_below' + imageExt,
-  mediaDir + instrImageDir + 'below_on' + imageExt
-];
-var instr_dispImages = [0, 0, 1, 2, '', '']; // which instructions screens to show images on (and which ones; index refers to elements in imageList_instr)
 
 /*************************
 *   Initial Functions    *
