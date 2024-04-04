@@ -349,13 +349,13 @@ function generateTrials() {
 
   // now add practice trials
   practice_trials = [
-    {'trialType': 'practice', 'blockNum': 0, 'stimType': 'sym', 'fillColor': [fillColorNames[0], fillColorNames[1]], 'shapeType': 'oval', 'angle': 0},
-    {'trialType': 'practice', 'blockNum': 0, 'stimType': 'sym', 'fillColor': [fillColorNames[0], fillColorNames[1]], 'shapeType': 'rect', 'angle': 45},
-    {'trialType': 'practice', 'blockNum': 0, 'stimType': 'non-sym', 'fillColor': [fillColorNames[0], fillColorNames[1]], 'shapeType': 'oval', 'angle': 90},
-    {'trialType': 'practice', 'blockNum': 0, 'stimType': 'non-sym', 'fillColor': [fillColorNames[0], fillColorNames[1]], 'shapeType': 'rect', 'angle': 135}    
+    {'trialType': 'practice', 'blockNum': 0, 'wordPair': 'NA', 'stimType': 'sym', 'fillColor': [fillColorNames[0], fillColorNames[1]], 'shapeType': 'oval', 'angle': 0},
+    {'trialType': 'practice', 'blockNum': 0, 'wordPair': 'NA', 'stimType': 'sym', 'fillColor': [fillColorNames[0], fillColorNames[1]], 'shapeType': 'rect', 'angle': 45},
+    {'trialType': 'practice', 'blockNum': 0, 'wordPair': 'NA', 'stimType': 'non-sym', 'fillColor': [fillColorNames[0], fillColorNames[1]], 'shapeType': 'oval', 'angle': 90},
+    {'trialType': 'practice', 'blockNum': 0, 'wordPair': 'NA', 'stimType': 'non-sym', 'fillColor': [fillColorNames[0], fillColorNames[1]], 'shapeType': 'rect', 'angle': 135}    
   ]
   Shuffle(practice_trials);
-  trials = trials.concat(practice_trials);
+  trials = practice_trials.concat(trials);
 
   return trials;
 };
@@ -649,12 +649,18 @@ function animEvent() {
   //   oscDisconnected = true;
   // }
   // update positions
-  if (t_elapsed < t_collision) {
-    x = [x_initial[0] + v_pxPerMS * t_elapsed, x_initial[1] - v_pxPerMS * t_elapsed];
-  } else if (t_elapsed > t_collision & trial['stimType'] == 'sym') {
-    x = [x_initial[0] - v_pxPerMS * t_elapsed, x_initial[1] + v_pxPerMS * t_elapsed]; 
+  var v_toUse = v_pxPerMS;
+  if (t_elapsed > t_collision) {
+    v_toUse = v_pxPerMS;
+    if (trial['stimType'] == 'sym') {
+      v_toUse = - v_pxPerMS;
+    }
   }
-
+  x = [
+    x_initial[0] + v_pxPerMS * t_elapsed + v_toUse * (currentTime() - t_collision - t0_curAnim), 
+    x_initial[1] - v_pxPerMS * t_elapsed + v_toUse * (currentTime() - t_collision - t0_curAnim)
+  ];
+ 
   // next frame or move on
   if (t_elapsed < t_end) {
     requestAnimationFrame(animEvent);
