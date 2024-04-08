@@ -751,7 +751,7 @@ function clickSubmitRedirect() {
   responses['totalDuration_fromPreload'] = currentTime() - startPreloadTime;
   // submit data to server
   //submitData();
-   submitData('../data');
+   submitData('symmetry_spring_github/data');
   // redirect back to experiment system
   redirect();
 }
