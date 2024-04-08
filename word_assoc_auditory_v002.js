@@ -230,16 +230,16 @@ function introRoutines() {
   console.log('subj: ' + subjectID);
 
   // set redirect url
-  urlRedirect = baseURL + '?';
-  for ( param in urlParams ) {
-    urlRedirect = urlRedirect.concat(param + '=' + urlParams[param] + '&');
-  }
+  // urlRedirect = baseURL + '?';
+  // for ( param in urlParams ) {
+  //   urlRedirect = urlRedirect.concat(param + '=' + urlParams[param] + '&');
+  // }
   // trim off last ampersand
-  urlRedirect = urlRedirect.substring(0, urlRedirect.length-1);
+  //urlRedirect = urlRedirect.substring(0, urlRedirect.length-1);
 
   // change redirect info in html
   replaceHTMLText('submitText', 'SYSTEM', experimentSystem );
-  replaceHTMLText('redirect', 'SYSTEM', experimentSystem );
+  //replaceHTMLText('redirect', 'SYSTEM', experimentSystem );
 
   //// set up keyboard monitoring
   // key down
@@ -751,9 +751,9 @@ function clickSubmitRedirect() {
   responses['totalDuration_fromPreload'] = currentTime() - startPreloadTime;
   // submit data to server
   //submitData();
-   submitData('symmetry_spring_github/data');
+  submitData('symmetry_spring_github/data');
   // redirect back to experiment system
-  redirect();
+  //redirect();
 }
 
 function submitData(outDir) {
