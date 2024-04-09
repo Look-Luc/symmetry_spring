@@ -1116,16 +1116,16 @@ function redirect() {
 }
 
 // redirect countdown
-function countDown () {
-  finalCountDownClock--;
-  if (finalCountDownClock == 0) {
-    // clear countdown
-    clearInterval(redirectTimer);
-    // remove event listener (to allow for redirect)
-    window.removeEventListener('beforeunload', eventReturn);
-    // redirect
-    window.location = urlRedirect;
-  } else {
-    $('#countDown').text((finalCountDownClock).toString());
-  }
-}
+// function countDown () {
+//   finalCountDownClock--;
+//   if (finalCountDownClock == 0) {
+//     // clear countdown
+//     clearInterval(redirectTimer);
+//     // remove event listener (to allow for redirect)
+//     window.removeEventListener('beforeunload', eventReturn);
+//     // redirect
+//     window.location = urlRedirect;
+//   } else {
+//     $('#countDown').text((finalCountDownClock).toString());
+//   }
+// }
