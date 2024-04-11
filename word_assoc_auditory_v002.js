@@ -8,19 +8,19 @@
   // comment out either the SONA or Prolific sections below
 
 // SONA
-var experimentSystem = 'SONA';
-var baseURL = 'https://jhu.sona-systems.com/webstudy_credit.aspx';
-var urlParams = {
-  'experiment_id': '541',                                // unique to your study; should set before running
-  'credit_token':  'bce3aae6a4fa41e7ab1e012cb58f7d07'    // unique to your study; should set before running
-}
+// var experimentSystem = 'SONA';
+// var baseURL = 'https://jhu.sona-systems.com/webstudy_credit.aspx';
+// var urlParams = {
+//   'experiment_id': '541',                                // unique to your study; should set before running
+//   'credit_token':  'bce3aae6a4fa41e7ab1e012cb58f7d07'    // unique to your study; should set before running
+// }
 
 // Prolific
-// var experimentSystem = 'Prolific';
-// var baseURL = 'https://app.prolific.co/submissions/complete';
-// var urlParams = {
-//   'cc': 'XXXX'                                        // unique to your study; should set before running
-// }
+var experimentSystem = 'Prolific';
+var baseURL = 'https://app.prolific.co/submissions/complete';
+var urlParams = {
+  'cc': 'XXXX'                                        // unique to your study; should set before running
+}
 
 /*************************
 *      Debug Params      *
@@ -751,9 +751,9 @@ function clickSubmitRedirect() {
   responses['totalDuration_fromPreload'] = currentTime() - startPreloadTime;
   // submit data to server
   //submitData();
-  submitData('symmetry_spring_github/data');
+  submitData('./data');
   // redirect back to experiment system
-  //redirect();
+  redirect();
 }
 
 function submitData(outDir) {
@@ -1103,7 +1103,7 @@ function getSONAInfo() {
 }
 
 function redirect() {
-  // set url
+//   // set url
   $('#urlRedirect').text(urlRedirect);
   $('#urlRedirect').attr("href", urlRedirect);
   // hide
@@ -1116,16 +1116,16 @@ function redirect() {
 }
 
 // redirect countdown
-// function countDown () {
-//   finalCountDownClock--;
-//   if (finalCountDownClock == 0) {
-//     // clear countdown
-//     clearInterval(redirectTimer);
-//     // remove event listener (to allow for redirect)
-//     window.removeEventListener('beforeunload', eventReturn);
-//     // redirect
-//     window.location = urlRedirect;
-//   } else {
-//     $('#countDown').text((finalCountDownClock).toString());
-//   }
-// }
+function countDown () {
+  finalCountDownClock--;
+  if (finalCountDownClock == 0) {
+    // clear countdown
+    clearInterval(redirectTimer);
+    // remove event listener (to allow for redirect)
+    window.removeEventListener('beforeunload', eventReturn);
+    // redirect
+    window.location = urlRedirect;
+  } else {
+    $('#countDown').text((finalCountDownClock).toString());
+  }
+}
