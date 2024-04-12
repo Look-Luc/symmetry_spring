@@ -55,7 +55,7 @@ plugin-video-button-response|1.1.3|https://www.jspsych.org/7.3/plugins/video-but
 plugin-video-keyboard-response|1.1.3|https://www.jspsych.org/7.3/plugins/video-keyboard-response
 plugin-video-slider-response|1.1.3|https://www.jspsych.org/7.3/plugins/video-slider-response
 plugin-virtual-chinrest|2.0.3|https://www.jspsych.org/7.3/plugins/virtual-chinrest
-plugin-visual-search-circle|1.2.1|https://www.jspsych.org/7.3/plugins/visual-search-circle
+plugin-visual-search-circle|1.1.3|https://www.jspsych.org/7.3/plugins/visual-search-circle
 plugin-webgazer-calibrate|1.0.3|https://www.jspsych.org/7.3/plugins/webgazer-calibrate
 plugin-webgazer-init-camera|1.0.3|https://www.jspsych.org/7.3/plugins/webgazer-init-camera
 plugin-webgazer-validate|1.0.3|https://www.jspsych.org/7.3/plugins/webgazer-validate
