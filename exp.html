@@ -6,12 +6,14 @@
         <script src="jspsych/dist/plugin-html-keyboard-response.js"></script>
         <script src="jspsych/dist/plugin-instructions.js"></script>
         <script src="jspsych/dist/plugin-external-html.js"></script>
-        <script src="external_page.html"></script>
+        <!-- <script src="external_page.html"></script> -->
         <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css">
     </head>
     <body></body>
     <script>
-        var jsPsych = initJsPsych({});
+        var jsPsych = initJsPsych({
+            override_safe_mode: true
+        });
         var timeline = [];
 
         var check_consent = function(){
@@ -22,7 +24,7 @@
                 alerta("If you wish to participate, you must check the box next to the statement 'I agree to participate'");
                 return false;
             }
-            return false;
+            //return false;
         };
 
         var consentForm = {
