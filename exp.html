@@ -6,7 +6,7 @@
         <script src="jspsych/dist/plugin-html-keyboard-response.js"></script>
         <script src="jspsych/dist/plugin-instructions.js"></script>
         <script src="jspsych/dist/plugin-external-html.js"></script>
-        <!-- <script src="external_page.html"></script> -->
+        <script src="jspsych/dist/plugin-survey-multi-choice.js"></script>
         <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css">
     </head>
     <body></body>
@@ -49,8 +49,23 @@
             ],
             show_clickable_nav: true
         }
-
         timeline.push(instructions);
+
+        var questionary = {
+            type: jsPsychSurveyMultiChoice,
+            quesions: [
+                {
+                    prompt: "Are you a native speaker of English? In other words" + "<ul>" + "<li>are you fluent in English from birth and/or you are a fluent speaker of English</li>" + "</ul",
+                    name: "english",
+                    options: ["Yes", "No", "Not sure"],
+                    required: true,
+                    horizontal: true
+                },
+                {
+
+                }
+            ]
+        }
         jsPsych.run(timeline);
     </script>
 </html>
