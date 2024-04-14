@@ -15,6 +15,15 @@
         var jsPsych = initJsPsych({
             override_safe_mode: true
         });
+        var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
+        var study_id = jsPsych.data.getURLVariable('STUDY_ID');
+        var session_id = jsPsych.data.getURLVariable('SESSION_ID');
+
+        jsPsych.data.addProperties({
+            subject_id: subject_id,
+            study_id: study_id,
+            session_id: session_id
+        });
         var timeline = [];
 
         var check_consent = function(){
@@ -103,7 +112,15 @@
                 }
             ]
         }
-        timeline.push(open_ended)
+        timeline.push(open_ended);
+
+        var final_trial = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: `<p>You've finished the last task. Thanks for participating!</p>
+                <p><a href="https://app.prolific.co/submissions/complete?cc=XXXXXXX">Click here to return to Prolific and complete the study</a>.</p>`,
+            choices: "NO_KEYS"
+        }
+        timeline.push(final_trial);
         jsPsych.run(timeline);
     </script>
 </html>
