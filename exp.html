@@ -7,6 +7,7 @@
         <script src="jspsych/dist/plugin-instructions.js"></script>
         <script src="jspsych/dist/plugin-external-html.js"></script>
         <script src="jspsych/dist/plugin-survey-multi-choice.js"></script>
+        <script src="jspsych/dist/plugin-survey-text.js"></script>
         <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css">
     </head>
     <body></body>
@@ -53,16 +54,40 @@
 
         var questionary = {
             type: jsPsychSurveyMultiChoice,
-            quesions: [
+            questions: [
                 {
-                    prompt: "Are you a native speaker of English? In other words" + "<ul>" + "<li>are you fluent in English from birth and/or you are a fluent speaker of English</li>" + "</ul",
+                    prompt: "1: Are you a native speaker of English? In other words:" + "<ul>" + "<li>You learned English fluently from birth</li>" + "<li>You are a fluent speaker of English</li>" + "</ul",
                     name: "english",
                     options: ["Yes", "No", "Not sure"],
                     required: true,
                     horizontal: true
                 },
                 {
+                    prompt: "2: Are you a native speaker of any other language " + " <i>besides</i>" + " English? In other words:" + "<ul>" + "<li>You learned that language fluently from birth</li>" + "<li>You are a fluent speaker of that language</li>" + "</ul",
+                    name: "other lang",
+                    options: ["Yes", "No", "Not sure"],
+                    required: true,
+                    horizontal: true
+                },
+                {
+                    prompt:"3: What language do you currently use most?:",
+                    name: "what lang",
+                    options: ["English", "Other"],
+                    required: true,
+                    horizontal: true
+                }
+            ],
+        }
+        timeline.push(questionary);
 
+        var open_ended = {
+            type: jsPsychSurveyText,
+            questions: [
+                {
+                    prompt: "1. How did you decide which phrase best matched the video?",
+                    name: decide,
+                    rows:5,
+                    placeholder: "When the video was... I chose the phrase that..."
                 }
             ]
         }
