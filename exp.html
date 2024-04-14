@@ -88,9 +88,22 @@
                     name: decide,
                     rows:5,
                     placeholder: "When the video was... I chose the phrase that..."
+                },
+                {
+                    prompt: "2. Sometimes a beep played during the videos, and sometimes it did not. How do you think the presence of these beeps affected what you saw happen in the videos? (Just guess, do your best!)",
+                    name: beep,
+                    rows: 5,
+                    placeholder: "When the beep played... When the beep didn't play..."
+                },
+                {
+                    prompt: "3. In each trial, there were two options that you had to choose from. How would you describe them? (Just guess, do your best!) ",
+                    name: choices,
+                    rows: 5,
+                    placeholder: "One kind was... The other kind was..."
                 }
             ]
         }
+        timeline.push(open_ended)
         jsPsych.run(timeline);
     </script>
 </html>
