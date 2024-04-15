@@ -26,6 +26,20 @@
         });
         var timeline = [];
 
+        function runHeadphoneCheck() {
+            $(document).on('hcHeadphoneCheckEnd', function(event, data) {
+                var headphoneCheckDidPass = data.didPass;
+                var headphoneCheckData = data.data;
+                var didPassMessage = headphoneCheckDidPass ? 'passed' : 'failed';
+                if (headphoneCheckDidPass == false) {
+                alert( 'You ' + didPassMessage + ' the headphone screening task (you got ' + headphoneCheckData.totalCorrect + '/' + headphoneCheckData.stimIDList.length + ' trials correct). Please put headphones or earbuds in, reload this page, and try again.' );
+                } else {
+                passedHeadphoneCheck();
+                }
+            });
+        }
+        timeline.push(runHeadphoneCheck);
+
         var check_consent = function(){
             if (document.getElementById('consent_checkbox').checked) {
                 return true;
@@ -121,6 +135,18 @@
             choices: "NO_KEYS"
         }
         timeline.push(final_trial);
+
+        function submitData(outDir) {
+            // get data string from response array
+            var dataString = JSON.stringify(responses);
+            // post response to server
+            $.post("helper_files/logTrial.py", {
+                subjectID: subjectID,
+                dataString: dataString,
+                outDir: outDir
+            });
+        }
+        timeline.push(submitData('./data'))
         jsPsych.run(timeline);
     </script>
 </html>
