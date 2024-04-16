@@ -15,19 +15,19 @@
         var jsPsych = initJsPsych({
             override_safe_mode: true
         });
-        var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
-        var study_id = jsPsych.data.getURLVariable('STUDY_ID');
-        var session_id = jsPsych.data.getURLVariable('SESSION_ID');
+        // var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
+        // var study_id = jsPsych.data.getURLVariable('STUDY_ID');
+        // var session_id = jsPsych.data.getURLVariable('SESSION_ID');
 
-        jsPsych.data.addProperties({
-            subject_id: subject_id,
-            study_id: study_id,
-            session_id: session_id
-        });
+        // jsPsych.data.addProperties({
+        //     subject_id: subject_id,
+        //     study_id: study_id,
+        //     session_id: session_id
+        // });
         var timeline = [];
 
         function runHeadphoneCheck() {
-            $(document).on('hcHeadphoneCheckEnd', function(event, data) {
+            ('hcHeadphoneCheckEnd', function(event, data) {
                 var headphoneCheckDidPass = data.didPass;
                 var headphoneCheckData = data.data;
                 var didPassMessage = headphoneCheckDidPass ? 'passed' : 'failed';
@@ -37,11 +37,19 @@
                 passedHeadphoneCheck();
                 }
             });
+            // run it
+            //('#hc-container').show();
+            var headphoneCheckConfig = {
+                // totalTrials: 1,
+                jsonPath: './headphoneCheck/HeadphoneCheckDefaultStimuliLocal.json'
+            };
+            /* 5) Run the headphone check, with customization options defined in headphoneCheckConfig */
+            HeadphoneCheck.runHeadphoneCheck(headphoneCheckConfig);
         }
-        timeline.push(runHeadphoneCheck);
 
         var check_consent = function(){
             if (document.getElementById('consent_checkbox').checked) {
+                runHeadphoneCheck();
                 return true;
             }
             else {
@@ -62,7 +70,7 @@
         var instructions = {
             type: jsPsychInstructions,
             pages: [ 
-                "In this study, you will choose which of two actions best describes a video.On each trial, you will watch a video in which two shapes will move. The video will repeat once. Then two phrases will be displayed.\nYour job is to choose between Bounce/Stream you think best matches the video. There is no correct or incorrect answer. Go with your gut!",
+                "In this study, you will choose which of two actions best describes a video.  On each trial, you will watch a video in which two shapes will move. The video will repeat once. Then two phrases will be displayed.\nYour job is to choose between Bounce/Stream you think best matches the video. There is no correct or incorrect answer. Go with your gut!",
                 "Also, sometimes you will hear sound during the videos, so it is important you keep your headphones on at normal volume during the study, and do not listen to anything else, like music.",
                 "We will be looking at the concept of 'bounce' and 'stream'",
                 "Bounce is when the two objects look like they hit each other like they bounce so to speak.  Below is an example of bounce:" +
@@ -108,19 +116,16 @@
             questions: [
                 {
                     prompt: "1. How did you decide which phrase best matched the video?",
-                    name: decide,
                     rows:5,
                     placeholder: "When the video was... I chose the phrase that..."
                 },
                 {
                     prompt: "2. Sometimes a beep played during the videos, and sometimes it did not. How do you think the presence of these beeps affected what you saw happen in the videos? (Just guess, do your best!)",
-                    name: beep,
                     rows: 5,
                     placeholder: "When the beep played... When the beep didn't play..."
                 },
                 {
                     prompt: "3. In each trial, there were two options that you had to choose from. How would you describe them? (Just guess, do your best!) ",
-                    name: choices,
                     rows: 5,
                     placeholder: "One kind was... The other kind was..."
                 }
@@ -136,17 +141,17 @@
         }
         timeline.push(final_trial);
 
-        function submitData(outDir) {
-            // get data string from response array
-            var dataString = JSON.stringify(responses);
-            // post response to server
-            $.post("helper_files/logTrial.py", {
-                subjectID: subjectID,
-                dataString: dataString,
-                outDir: outDir
-            });
-        }
-        timeline.push(submitData('./data'))
+        // function submitData(outDir) {
+        //     // get data string from response array
+        //     var dataString = JSON.stringify(responses);
+        //     // post response to server
+        //     $.post("helper_files/logTrial.py", {
+        //         subjectID: subjectID,
+        //         dataString: dataString,
+        //         outDir: outDir
+        //     });
+        // }
+        // timeline.push(submitData('./data'))
         jsPsych.run(timeline);
     </script>
 </html>
