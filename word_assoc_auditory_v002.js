@@ -8,19 +8,19 @@
   // comment out either the SONA or Prolific sections below
 
 // SONA
-var experimentSystem = 'SONA';
-var baseURL = 'https://jhu.sona-systems.com/webstudy_credit.aspx';
-var urlParams = {
-  'experiment_id': '541',                                // unique to your study; should set before running
-  'credit_token':  'bce3aae6a4fa41e7ab1e012cb58f7d07'    // unique to your study; should set before running
-}
+// var experimentSystem = 'SONA';
+// var baseURL = 'https://jhu.sona-systems.com/webstudy_credit.aspx';
+// var urlParams = {
+//   'experiment_id': '541',                                // unique to your study; should set before running
+//   'credit_token':  'bce3aae6a4fa41e7ab1e012cb58f7d07'    // unique to your study; should set before running
+// }
 
 // Prolific
-// var experimentSystem = 'Prolific';
-// var baseURL = 'https://app.prolific.co/submissions/complete';
-// var urlParams = {
-//   'cc': 'XXXX'                                        // unique to your study; should set before running
-// }
+var experimentSystem = 'Prolific';
+var baseURL = 'https://app.prolific.co/submissions/complete';
+var urlParams = {
+  'cc': 'XXXX'                                        // unique to your study; should set before running
+}
 
 /*************************
 *      Debug Params      *
@@ -91,8 +91,8 @@ soundStartTimes['simul'] = 0;
 // calculation for collision timing (t = d / v)
   // v * 2 because they are both approaching at the same speed, opposite signs
 var t_startSound, t_stopSound;
-var t_collision = (canvasWidth - xOffsetFromEdge_initial * 2) / (v_pxPerMS * 2);
-// var t_collision = (canvasWidth - xOffsetFromEdge_initial * 2 - radius * 2) / (v_pxPerMS * 2);
+// var t_collision = (canvasWidth - xOffsetFromEdge_initial * 2) / (v_pxPerMS * 2);
+var t_collision = (canvasWidth - xOffsetFromEdge_initial * 2 - radius) / (v_pxPerMS * 2);
 // calc for end of animation
 var t_end = (canvasWidth - xOffsetFromEdge_initial * 2) / v_pxPerMS;
 
@@ -275,7 +275,8 @@ function generateTrials() {
     for (b = 0; b < shapeTypes.length; b++) {
       for (c = 0; c < angles.length; c++) {
         curVidCombo = {};
-        curVidCombo['fillColor'] = fillColorNames[a];
+        curVidCombo['fillColors'] = [fillColorNames[0], fillColorNames[1]];
+        // curVidCombo['fillColor'] = fillColorNames[a];
         curVidCombo['shapeType'] = shapeTypes[b];
         curVidCombo['angle'] = angles[c];
         vidCombos.push(curVidCombo);
@@ -317,7 +318,8 @@ function generateTrials() {
         curTrial['stimType'] = stimTypes[ stimTypeForItem ];
 
         // now video parameters of non-interest
-        curTrial['fillColor'] = vidCombos[iiWP]['fillColor'];
+        curTrial['fillColors'] = vidCombos[iiWP]['fillColors'];
+        // curTrial['fillColor'] = vidCombos[iiWP]['fillColor'];
         curTrial['shapeType'] = vidCombos[iiWP]['shapeType'];
         curTrial['angle'] = vidCombos[iiWP]['angle'];
 
@@ -587,24 +589,39 @@ function fixation() {
 }
 
 function animEvent() {
+  // time elapsed since animation start
+  var t_elapsed = currentTime() - t0_curAnim;
+  // update positions
+  // x = [x_initial[0] + v_pxPerMS * t_elapsed, x_initial[1] - v_pxPerMS * t_elapsed];
+  var v_multiplier; // equivalently to the below if statement (will produce 1 if false, -1 if true): 2*(trial['stimType'] != 'simul') - 1
+  if (trial['stimType'] == 'simul') {
+    v_multiplier = -1;
+  } else {
+    v_multiplier = 1;
+  }
+  if (t_elapsed < t_collision) {
+    x = [x_initial[0] + v_pxPerMS * t_elapsed, x_initial[1] - v_pxPerMS * t_elapsed];
+  } else {
+    x = [x_initial[0] + v_pxPerMS * (t_collision + v_multiplier * (t_elapsed - t_collision)), 
+        x_initial[1] - v_pxPerMS * (t_collision + v_multiplier * (t_elapsed - t_collision))];
+  }
+
   ctx.save(); //saves the state of canvas
   clearAndDrawBackground(canvasWidth, canvasHeight);
   ctx.translate(canvasWidth/2, canvasHeight/2);
   ctx.rotate(Math.PI / 180 * (trial['angle'])); // rotate the canvas
   if (trial['shapeType'] == 'oval') {
     // 1
-    drawCircle(x[0]-canvasWidth/2, y[0]-canvasHeight/2, radius, fillColors[ trial['fillColor'] ]);
+    drawCircle(x[0]-canvasWidth/2, y[0]-canvasHeight/2, radius, fillColors[ trial['fillColors'][0] ]);
     // 2
-    drawCircle(x[1]-canvasWidth/2, y[1]-canvasHeight/2, radius, fillColors[ trial['fillColor'] ]);
+    drawCircle(x[1]-canvasWidth/2, y[1]-canvasHeight/2, radius, fillColors[ trial['fillColors'][1] ]);
   } else {
     // 1
-    drawRect(radius*2, radius*2, x[0]-radius-canvasWidth/2, y[0]-radius-canvasHeight/2, fillColors[ trial['fillColor'] ]);
+    drawRect(radius*2, radius*2, x[0]-radius-canvasWidth/2, y[0]-radius-canvasHeight/2, fillColors[ trial['fillColors'][0] ]);
     // 2
-    drawRect(radius*2, radius*2, x[1]-radius-canvasWidth/2, y[1]-radius-canvasHeight/2, radius, fillColors[ trial['fillColor'] ]);
+    drawRect(radius*2, radius*2, x[1]-radius-canvasWidth/2, y[1]-radius-canvasHeight/2, fillColors[ trial['fillColors'][1] ]);
   }
   ctx.restore();
-  // time elapsed since animation start
-  var t_elapsed = currentTime() - t0_curAnim;
   // test if sound
   if (soundStarted == false & t_elapsed > t_startSound) {
     startSineTone();
@@ -620,8 +637,6 @@ function animEvent() {
   //   disconnectOscillator();
   //   oscDisconnected = true;
   // }
-  // update positions
-  x = [x_initial[0] + v_pxPerMS * t_elapsed, x_initial[1] - v_pxPerMS * t_elapsed];
 
   // next frame or move on
   if (t_elapsed < t_end) {
