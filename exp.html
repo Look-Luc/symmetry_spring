@@ -24,7 +24,6 @@
         //     study_id: study_id,
         //     session_id: session_id
         // });
-        var timeline = [];
 
                 //----------------------------------------------------------------------------------//
         // HEADPHONE CHECK STIMULI WITH METADATA
@@ -150,12 +149,13 @@
         var hc_pass = {
             timeline: [
                 headphone_check_pass, 
-                instructions, 
-                practice, 
-                trial_instructions, 
-                block, 
-               upload_data, 
-                debrief],
+            //     instructions, 
+            //     practice, 
+            //     trial_instructions, 
+            //     block, 
+            //    upload_data, 
+            //     debrief
+            ],
             conditional_function: function() {
                 correct_trials = jsPsych.data.get().last(6).filter({
                 correct: true,
@@ -168,11 +168,12 @@
         var hc_pass_failed_hc = {
             timeline: [
                 instructions, 
-                practice, 
-                trial_instructions, 
-                block, 
-               upload_failed_data, 
-                debrief],
+            //     practice, 
+            //     trial_instructions, 
+            //     block, 
+            //    upload_failed_data, 
+            //     debrief
+            ],
             conditional_function: function() {
                 return (fail_choice == 1);
             }
@@ -216,7 +217,7 @@
                 fail_options_node,
                 headphone_check_loop,
                 hc_pass_failed_hc,
-                debrief_node
+                //debrief_node
             ],
             on_start: function() {
                 do_hc = false;
@@ -229,14 +230,15 @@
                 return (correct_trials < 5);
             }
         };
-        timeline.push[headphone_check];
 
-        var check_consent = function(){
+        var timeline = [];
+        //Start of Experiment
+        var check_consent = function(elem) {
             if (document.getElementById('consent_checkbox').checked) {
                 return true;
             }
             else {
-                alerta("If you wish to participate, you must check the box next to the statement 'I agree to participate'");
+                alert("If you wish to participate, you must check the box next to the statement 'I agree to participate in this study.'");
                 return false;
             }
             return false;
