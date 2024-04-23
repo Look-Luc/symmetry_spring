@@ -4,10 +4,13 @@
         <title>Visual Association</title>
         <script src="jspsych/dist/jspsych.js"></script>
         <script src="jspsych/dist/plugin-html-keyboard-response.js"></script>
+        <script src="jspsych/dist/plugin-html-button-response.js"></script>
         <script src="jspsych/dist/plugin-instructions.js"></script>
         <script src="jspsych/dist/plugin-external-html.js"></script>
         <script src="jspsych/dist/plugin-survey-multi-choice.js"></script>
         <script src="jspsych/dist/plugin-survey-text.js"></script>
+        <script src="jspsych/dist/plugin-instructions.js"></script>
+        <script src="jspsych/dist/plugin-audio-button-response.js"></script>
         <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css">
     </head>
     <body></body>
@@ -15,213 +18,6 @@
         var jsPsych = initJsPsych({
             override_safe_mode: true
         });
-
-        //----------------------------------------------------------------------------------//
-        // HEADPHONE CHECK STIMULI WITH METADATA
-        //----------------------------------------------------------------------------------//
-        var headphone_stimuli = [
-            {stimulus: 'headphone_check/antiphase_HC_IOS.wav', correct_response: '2'},
-            {stimulus: 'headphone_check/antiphase_HC_ISO.wav', correct_response: '1'},
-            {stimulus: 'headphone_check/antiphase_HC_OIS.wav', correct_response: '2'},
-            {stimulus: 'headphone_check/antiphase_HC_OSI.wav', correct_response: '1'},
-            {stimulus: 'headphone_check/antiphase_HC_SIO.wav', correct_response: '0'},
-            {stimulus: 'headphone_check/antiphase_HC_SOI.wav', correct_response: '0'}
-        ];
-
-        //----------------------------------------------------------------------------------//
-        // HEADPHONE CHECK TRIAL
-        // Adapted from https://github.com/mcdermottLab/HeadphoneCheck
-        //----------------------------------------------------------------------------------//
-       
-        var do_hc = true;
-        var correct_trials = 0;
-        
-        var headphone_check = {
-            type: 'audio-button-response',
-            stimulus: jsPsych.timelineVariable('stimulus'),
-            prompt: 'Which of the three sounds was the quietest?',
-            choices: ['1st','2nd','3rd'],
-            response_ends_trial: true,
-            post_trial_gap: 1000,
-            data: {correct_response: jsPsych.timelineVariable('correct_response')},
-            on_finish: function(data){
-                data.correct = (data.button_pressed === data.correct_response);
-            }
-        };
-
-        var headphone_check_pass = {
-            type: 'instructions',
-            show_clickable_nav: true,
-            pages: [
-                //P1
-                '<p>You passed the headphone check!</p>' +
-                '<p>Click <strong>Next</strong> to continue.</p>',
-                ],
-            on_start: function() {
-                jsPsych.setProgressBar(0.08);
-            },
-        };
-
-        //----------------------------------------------------------------------------------//
-        // OPTIONS IF HEADPHONE CHECK FAILED A SECOND TIME
-        //----------------------------------------------------------------------------------//
-        
-        // create variable to determine which node plays next:
-        //  0 = redo headphone check
-        //  1 = continue to experiment as if they had passed check; data will be marked as unusable
-        //  2 = continue to debrief to get SONA credit
-        var fail_choice;
-        
-        var fail_options = {
-            type: 'html-button-response',
-            stimulus: 'Options:',
-            prompt: 'You have now failed the headphone check twice. You may either retry the headphone check; continue to the experiment, but know that your data will not be used by the experimenters (you will still get SONA credit); or be redirected to SONA where you will get full credit for attempting the experiment.',
-            choices: ['Try headphone check again', 'Continue to experiment', 'Redirect to SONA'],
-            on_start: function() {
-                fail_choice = null;
-            },
-            on_finish: function(trial_data) {
-                var response = trial_data.button_pressed
-                if (response == 0) {
-                    do_hc = true;
-                    fail_choice = 0;
-                } else if (response == 1) {
-                    fail_choice = 1;
-                } else if (response == 2) {
-                    fail_choice = 2;
-                }
-            }
-        };
-
-        var fail_options_node = {
-            timeline: [fail_options],
-            conditional_function: function() {
-                correct_trials = jsPsych.data.get().last(6).filter({
-                    correct: true,
-                    trial_type: 'audio-button-response'
-                }).count();
-                return (correct_trials < 5);
-            }
-        };
-
-        //----------------------------------------------------------------------------------//
-        // HEADPHONE CHECK BLOCK
-        //----------------------------------------------------------------------------------//
-
-        var headphone_check_node = {
-            timeline: [headphone_check],
-            timeline_variables: headphone_stimuli,
-            randomize_order: true,
-            repetitions: 1,
-            conditional_function: function() {
-                return (do_hc);
-            }
-        };
-
-        var headphone_check_loop = {
-            timeline: [headphone_check_node, fail_options_node],
-            loop_function: function() {
-                 correct_trials = jsPsych.data.get().last(6).filter({
-                 correct: true,
-                 trial_type: 'audio-button-response'
-             }).count();
-                return (correct_trials < 5);
-            },
-            conditional_function: function() {
-                return (fail_choice == 0)
-            }
-
-        }
-
-
-        //----------------------------------------------------------------------------------//
-        // HEADPHONE CHECK PROCEEDINGS **IF PASSED**
-        //----------------------------------------------------------------------------------//
-        var hc_pass = {
-            timeline: [
-                headphone_check_pass, 
-            //     instructions, 
-            //     practice, 
-            //     trial_instructions, 
-            //     block, 
-            //    upload_data, 
-            //     debrief
-            ],
-            conditional_function: function() {
-                correct_trials = jsPsych.data.get().last(6).filter({
-                correct: true,
-                trial_type: 'audio-button-response'
-            }).count();
-                return (correct_trials >= 5);
-            }
-        };
-
-        var hc_pass_failed_hc = {
-            timeline: [
-                instructions, 
-            //     practice, 
-            //     trial_instructions, 
-            //     block, 
-            //    upload_failed_data, 
-            //     debrief
-            ],
-            conditional_function: function() {
-                return (fail_choice == 1);
-            }
-        };
-
-        //----------------------------------------------------------------------------------//
-        // HEADPHONE CHECK PROCEEDINGS **IF DID NOT PASS**
-        //----------------------------------------------------------------------------------//
-        
-        var hc_round_2 = {
-            timeline: [headphone_check],
-            timeline_variables: headphone_stimuli,
-            randomize_order: true,
-            repetitions: 1
-        };
-
-        var headphone_check_fail = {
-            type: 'instructions',
-            show_clickable_nav: true,
-            pages: [
-                '<p>You have failed the headphone check, getting ' + correct_trials + ' out of 6 trials correct. You need at least 5 correct to pass.</p>' +
-                '<p>You will now repeat the headphone check. Make sure you are in a quiet location with headphones on. Click <strong>"Next"</strong> to continue.</p>'
-            ],
-            on_start: function() {
-                correct_trials = jsPsych.data.get().last(6).filter({
-                    correct: true,
-                    trial_type: 'audio-button-response'
-                }).count();
-            },
-            on_finish: function() {
-                console.log(correct_trials);
-            }
-        };
-
-        
-        var hc_fail = {
-            timeline: [
-                headphone_check_fail,
-                hc_round_2,
-                hc_pass,
-                fail_options_node,
-                headphone_check_loop,
-                hc_pass_failed_hc,
-                //debrief_node
-            ],
-            on_start: function() {
-                do_hc = false;
-            },
-            conditional_function: function() {
-                correct_trials = jsPsych.data.get().last(6).filter({
-                correct: true,
-                trial_type: 'audio-button-response'
-            }).count();
-                return (correct_trials < 5);
-            }
-        };
-
         var timeline = [];
         //Start of Experiment
         var check_consent = function(elem) {
@@ -241,23 +37,24 @@
             cont_btn: "start",
             check_fn: check_consent
         };
-        timeline.push(consentForm);
+        //timeline.push(consentForm);
 
         var instructions = {
             type: jsPsychInstructions,
             pages: [ 
-                "In this study, you will choose which of two actions best describes a video.  On each trial, you will watch a video in which two shapes will move. The video will repeat once. Then two phrases will be displayed.\nYour job is to choose between Bounce/Stream you think best matches the video. There is no correct or incorrect answer. Go with your gut!",
+                "In this study, you will choose bounce/stream that best describes a video.  On each trial, you will watch a video in which two shapes will move. The video will repeat once. Then two words (Bounce and Stream) will be displayed.\nYour job is to choose between Bounce/Stream that you think best matches the video. There is no correct or incorrect answer. Go with your gut!",
                 "Also, sometimes you will hear sound during the videos, so it is important you keep your headphones on at normal volume during the study, and do not listen to anything else, like music.",
                 "We will be looking at the concept of 'bounce' and 'stream'",
-                "Bounce is when the two objects look like they hit each other like they bounce so to speak.  Below is an example of bounce:" +
-                "<br>" + "<img src=media/bounce_example.png></img>",
-                "Stream is when the two objects pass each other or phase each other.  Below is an example of stream:" + "<br>" + "<img src=media/stream_example.png></img>",
+                "Bounce is when the two objects are moving towards each other and hit each other and bounce off.  Below is an example of bounce:" +
+                "<br>" + "<img src=media/bounce_example.png></img>" + "</br>As you can see, the two spheres come towards each other and at a point they  bounce off each other.",
+                "Stream is when the two objects pass or phase each other.  Below is an example of stream:" + 
+                "<br>" + "<img src=media/stream_example.png></img></br>As you can see, the spheres did not collide but instead went through each other.",
                 "The whole study will only take about 8-10 minutes; please stay focused!",
-                "If you are ready, one more next to press to start"
+                "If you are ready, one more next to press to start!!"
             ],
             show_clickable_nav: true
         }
-        timeline.push(instructions);
+        //timeline.push(instructions);
 
         var questionary = {
             type: jsPsychSurveyMultiChoice,
@@ -285,7 +82,7 @@
                 }
             ],
         }
-        timeline.push(questionary);
+        //timeline.push(questionary);
 
         var open_ended = {
             type: jsPsychSurveyText,
@@ -307,7 +104,7 @@
                 }
             ]
         }
-        timeline.push(open_ended);
+        //timeline.push(open_ended);
 
         var final_trial = {
             type: jsPsychHtmlKeyboardResponse,
@@ -315,7 +112,7 @@
                 <p><a href="https://app.prolific.co/submissions/complete?cc=XXXXXXX">Click here to return to Prolific and complete the study</a>.</p>`,
             choices: "NO_KEYS"
         }
-        timeline.push(final_trial);
+        //timeline.push(final_trial);
 
         // function submitData(outDir) {
         //     // get data string from response array
@@ -328,6 +125,216 @@
         //     });
         // }
         // timeline.push(submitData('./data'))
+        //----------------------------------------------------------------------------------//
+        // HEADPHONE CHECK STIMULI WITH METADATA
+        //----------------------------------------------------------------------------------//
+        var headphone_stimuli = [
+            {stimulus: 'headphoneCheck/assets/antiphase_HC_IOS.wav', correct_response: '2'},
+            {stimulus: 'headphoneCheck/assets/antiphase_HC_ISO.wav', correct_response: '1'},
+            {stimulus: 'headphoneCheck/assets/antiphase_HC_OIS.wav', correct_response: '2'},
+            {stimulus: 'headphoneCheck/assets/antiphase_HC_OSI.wav', correct_response: '1'},
+            {stimulus: 'headphoneCheck/assets/antiphase_HC_SIO.wav', correct_response: '0'},
+            {stimulus: 'headphoneCheck/assets/antiphase_HC_SOI.wav', correct_response: '0'}
+        ];
+
+        //----------------------------------------------------------------------------------//
+        // HEADPHONE CHECK TRIAL
+        // Adapted from https://github.com/mcdermottLab/HeadphoneCheck
+        //----------------------------------------------------------------------------------//
+       
+        var do_hc = true;
+        var correct_trials = 0;
+        
+        var headphone_check = {
+            type: jsPsychAudioButtonResponse,
+            stimulus: jsPsych.timelineVariable('stimulus'),
+            prompt: 'Which of the three sounds was the quietest?',
+            choices: ['1st','2nd','3rd'],
+            response_ends_trial: true,
+            post_trial_gap: 1000,
+            data: {correct_response: jsPsych.timelineVariable('correct_response')},
+            on_finish: function(data){
+                data.correct = (data.button_pressed === data.correct_response);
+            }
+        };
+
+        var headphone_check_pass = {
+            type: jsPsychInstructions,
+            show_clickable_nav: true,
+            pages: [
+                //P1
+                '<p>You passed the headphone check!</p>' +
+                '<p>Click <strong>Next</strong> to continue.</p>',
+                ],
+            on_start: function() {
+                jsPsych.setProgressBar(0.08);
+            },
+        };
+
+        //----------------------------------------------------------------------------------//
+        // OPTIONS IF HEADPHONE CHECK FAILED A SECOND TIME
+        //----------------------------------------------------------------------------------//
+        
+        // create variable to determine which node plays next:
+        //  0 = redo headphone check
+        //  1 = continue to experiment as if they had passed check; data will be marked as unusable
+        //  2 = continue to debrief to get SONA credit
+        var fail_choice;
+        
+        var fail_options = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: 'Options:',
+            prompt: 'You have now failed the headphone check twice. You may either retry the headphone check; continue to the experiment, but know that your data will not be used by the experimenters (you will still get SONA credit); or be redirected to SONA where you will get full credit for attempting the experiment.',
+            choices: ['Try headphone check again', 'Continue to experiment', 'Redirect to SONA'],
+            on_start: function() {
+                fail_choice = null;
+            },
+            on_finish: function(trial_data) {
+                var response = trial_data.button_pressed
+                if (response == 0) {
+                    do_hc = true;
+                    fail_choice = 0;
+                } else if (response == 1) {
+                    fail_choice = 1;
+                } else if (response == 2) {
+                    fail_choice = 2;
+                }
+            }
+        };
+
+        var fail_options_node = {
+            timeline: [fail_options],
+            conditional_function: function() {
+                correct_trials = jsPsych.data.get().last(6).filter({
+                    correct: true,
+                    trial_type: jsPsychAudioButtonResponse
+                }).count();
+                return (correct_trials < 5);
+            }
+        };
+
+        //----------------------------------------------------------------------------------//
+        // HEADPHONE CHECK BLOCK
+        //----------------------------------------------------------------------------------//
+
+        var headphone_check_node = {
+            timeline: [headphone_check],
+            timeline_variables: headphone_stimuli,
+            randomize_order: true,
+            repetitions: 1,
+            conditional_function: function() {
+                return (do_hc);
+            }
+        };
+        timeline.push(headphone_check_node)
+
+        var headphone_check_loop = {
+            timeline: [headphone_check_node, fail_options_node],
+            loop_function: function() {
+                 correct_trials = jsPsych.data.get().last(6).filter({
+                 correct: true,
+                 trial_type: jsPsychAudioButtonResponse
+                }).count();
+                return (correct_trials < 5);
+            },
+            conditional_function: function() {
+                return (fail_choice == 0)
+            }
+
+        }
+        timeline.push(headphone_check_loop);
+
+        //----------------------------------------------------------------------------------//
+        // HEADPHONE CHECK PROCEEDINGS **IF PASSED**
+        //----------------------------------------------------------------------------------//
+        var hc_pass = {
+            timeline: [
+                headphone_check_pass, 
+                instructions, 
+                consentForm,
+                instructions,
+                questionary,
+                open_ended,
+                final_trial
+                ],
+            conditional_function: function() {
+                correct_trials = jsPsych.data.get().last(6).filter({
+                correct: true,
+                trial_type: jsPsychAudioButtonResponse
+            }).count();
+                return (correct_trials >= 5);
+            }
+        };
+        timeline.push(hc_pass);
+
+        var hc_pass_failed_hc = {
+            timeline: [ 
+                instructions, 
+                consentForm,
+                instructions,
+                questionary,
+                open_ended,
+                final_trial],
+            conditional_function: function() {
+                return (fail_choice == 1);
+            }
+        };
+        //timeline.push(hc_pass_failed_hc);
+
+        //----------------------------------------------------------------------------------//
+        // HEADPHONE CHECK PROCEEDINGS **IF DID NOT PASS**
+        //----------------------------------------------------------------------------------//
+        
+        var hc_round_2 = {
+            timeline: [headphone_check],
+            timeline_variables: headphone_stimuli,
+            randomize_order: true,
+            repetitions: 1
+        };
+        timeline.push(hc_round_2);
+
+        var headphone_check_fail = {
+            type: jsPsychInstructions,
+            show_clickable_nav: true,
+            pages: [
+                '<p>You have failed the headphone check, getting ' + correct_trials + ' out of 6 trials correct. You need at least 5 correct to pass.</p>' +
+                '<p>You will now repeat the headphone check. Make sure you are in a quiet location with headphones on. Click <strong>"Next"</strong> to continue.</p>'
+            ],
+            on_start: function() {
+                correct_trials = jsPsych.data.get().last(6).filter({
+                    correct: true,
+                    trial_type: jsPsychAudioButtonResponse
+                }).count();
+            },
+            on_finish: function() {
+                console.log(correct_trials);
+            }
+        };
+        //timeline.push(headphone_check_fail);
+
+        
+        var hc_fail = {
+            timeline: [
+                headphone_check_fail,
+                hc_round_2,
+                hc_pass,
+                fail_options_node,
+                headphone_check_loop,
+                hc_pass_failed_hc,
+            ],
+            on_start: function() {
+                do_hc = false;
+            },
+            conditional_function: function() {
+                correct_trials = jsPsych.data.get().last(6).filter({
+                correct: true,
+                trial_type: jsPsychAudioButtonResponse
+            }).count();
+                return (correct_trials < 5);
+            }
+        };
+        timeline.push(hc_fail);
+
         jsPsych.run(timeline);
     </script>
 </html>
