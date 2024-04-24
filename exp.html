@@ -19,6 +19,7 @@
             override_safe_mode: true
         });
         var timeline = [];
+
         //Start of Experiment
         var check_consent = function(elem) {
             if (document.getElementById('consent_checkbox').checked) {
@@ -55,6 +56,10 @@
             show_clickable_nav: true
         }
         //timeline.push(instructions);
+
+        var test = {
+            external: "animation.js"
+        }
 
         var questionary = {
             type: jsPsychSurveyMultiChoice,
@@ -279,7 +284,7 @@
                 return (fail_choice == 1);
             }
         };
-        //timeline.push(hc_pass_failed_hc);
+        timeline.push(hc_pass_failed_hc);
 
         //----------------------------------------------------------------------------------//
         // HEADPHONE CHECK PROCEEDINGS **IF DID NOT PASS**
@@ -310,8 +315,6 @@
                 console.log(correct_trials);
             }
         };
-        //timeline.push(headphone_check_fail);
-
         
         var hc_fail = {
             timeline: [
