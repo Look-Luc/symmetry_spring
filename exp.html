@@ -267,7 +267,7 @@
             conditional_function: function() {
                 correct_trials = jsPsych.data.get().last(6).filter({
                 correct: true,
-                trial_type: jsPsychAudioButtonResponse
+                trial_type: "jsPsychAudioButtonResponse"
             }).count();
                 return (correct_trials >= 5);
             }
@@ -331,7 +331,7 @@
                 questionary,
                 open_ended,
                 final_trial,
-                submitData('./helper_files/data')
+                //submitData('./helper_files/data')
             ],
             on_start: function() {
                 do_hc = false;
