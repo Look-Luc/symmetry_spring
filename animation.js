@@ -1,5 +1,3 @@
-import "./helper_files/jquery.min.js";
-import "./helper_files/mturkfunctions.js";
 var keys = ['f','j'];
 var responseOptions = ["bounce", "stream"];
 var responseAssignments = Shuffle([0,1]);
@@ -7,9 +5,9 @@ var responseAssignments = Shuffle([0,1]);
 // run trial
 function runTrial() {
     // hide
-    ('#responseGroup').hide();
+    $('#responseGroup').hide();
     // update progress bar
-    ('#progressBar').css('width',((currentTrialNum/nTrials)*100) + 'px');
+    $('#progressBar').css('width',((currentTrialNum/nTrials)*100) + 'px');
     // begin trial dynamics
     //changePrompts();
     // initial positions
@@ -39,7 +37,7 @@ function runTrial() {
     //words[0] = trial['wordPair'][trial['wordOrder'][0]];
     //words[1] = trial['wordPair'][trial['wordOrder'][1]];
     
-    ('#responseText').html('<strong>' + keys[0].toUpperCase() + ' = </strong>' + responseOptions[responseAssignments[0]] + '<br><strong>' + keys[1].toUpperCase() + ' = </strong>' + responseOptions[responseAssignments[1]] + '');
+    $('#responseText').html('<strong>' + keys[0].toUpperCase() + ' = </strong>' + responseOptions[responseAssignments[0]] + '<br><strong>' + keys[1].toUpperCase() + ' = </strong>' + responseOptions[responseAssignments[1]] + '');
   }
   
   

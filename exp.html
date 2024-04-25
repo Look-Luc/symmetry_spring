@@ -11,12 +11,16 @@
         <script src="jspsych/dist/plugin-survey-text.js"></script>
         <script src="jspsych/dist/plugin-instructions.js"></script>
         <script src="jspsych/dist/plugin-audio-button-response.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <script src="helper_files/mturkfunctions.js"></script>
+        <script src="animation.js"></script>
         <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css">
     </head>
     <body></body>
     <script>
         var jsPsych = initJsPsych({
-            override_safe_mode: true
+            show_progress_bar: true
+            //override_safe_mode: true
         });
         var timeline = [];
 
@@ -56,10 +60,6 @@
             show_clickable_nav: true
         }
         //timeline.push(instructions);
-
-        // var test = {
-        //     external: "animation.js"
-        // }
 
         var questionary = {
             type: jsPsychSurveyMultiChoice,
@@ -159,7 +159,7 @@
             post_trial_gap: 1000,
             data: {correct_response: jsPsych.timelineVariable('correct_response')},
             on_finish: function(data){
-                data.correct = (data.button_pressed === data.correct_response);
+                data.correct = (data.response == data.correct_response);
             }
         };
 
@@ -195,7 +195,7 @@
                 fail_choice = null;
             },
             on_finish: function(trial_data) {
-                var response = trial_data.button_pressed
+                var response = trial_data.response
                 if (response == 0) {
                     do_hc = true;
                     fail_choice = 0;
@@ -256,9 +256,9 @@
         //----------------------------------------------------------------------------------//
         var hc_pass = {
             timeline: [
+                consentForm,
                 headphone_check_pass, 
                 instructions, 
-                consentForm,
                 instructions,
                 questionary,
                 open_ended,
@@ -267,7 +267,7 @@
             conditional_function: function() {
                 correct_trials = jsPsych.data.get().last(6).filter({
                 correct: true,
-                trial_type: "jsPsychAudioButtonResponse"
+                trial_type: "audio-button-response"
             }).count();
                 return (correct_trials >= 5);
             }
@@ -320,13 +320,13 @@
         
         var hc_fail = {
             timeline: [
+                consentForm,
                 headphone_check_fail,
                 hc_round_2,
                 hc_pass,
                 fail_options_node,
                 headphone_check_loop,
                 hc_pass_failed_hc,
-                consentForm,
                 instructions,
                 questionary,
                 open_ended,
