@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Visual Association</title>
+        <script src="jspsych/dist/jspsych.js"></script>
+        <script src="jspsych/dist/plugin-html-keyboard-response.js"></script>
+        <script src="jspsych/dist/plugin-html-button-response.js"></script>
+        <script src="jspsych/dist/plugin-instructions.js"></script>
+        <script src="jspsych/dist/plugin-external-html.js"></script>
+        <script src="jspsych/dist/plugin-survey-multi-choice.js"></script>
+        <script src="jspsych/dist/plugin-survey-text.js"></script>
+        <script src="jspsych/dist/plugin-instructions.js"></script>
+        <script src="jspsych/dist/plugin-audio-button-response.js"></script>
+        <script src="jspsych/dist/plugin-canvas-keyboard-response.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <script src="helper_files/mturkfunctions.js"></script>
+        <script src="animation.js"></script>
+        <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css">
+    </head>
+    <body></body>
+    <canvas id="myCanvas" width="450" height="450" style="border:1px solid #000000;"></canvas>
+    <script>
+        var jsPsych = initJsPsych({
+            show_progress_bar: false,
+            override_safe_mode: true
+        });
+        var timeline = [];
+
+        var c = document.getElementById("myCanvas");
+        var trial_anim = {
+            type: jsPsychCanvasKeyboardResponse,
+            stimulus: function dummy_function(c) {
+                var ctx = c.getContext("2d");        
+                // try to make a shape show up on screen
+                ctx.beginPath();
+                ctx.moveTo(0,0)
+                ctx.rect(0,0,450/3,450/3);
+                ctx.stroke();
+                
+                // next try to *animate* a rectangle moving
+                $(function(){
+                    //var ctx = c.getContext("2d");
+                    var x = 0;
+                    function render(){
+                        ctx.clearRect(0,0,c.width,c.height)
+                        ctx.beginPath()
+                        ctx.moveTo(x,-600)
+                        ctx.rect(0+x,0,450/3,450/3)
+                        ctx.stroke()
+                        x+=5
+                        if(x > c.width){
+                            x = -100
+                        }
+                        requestAnimationFrame(render);
+                    }
+                    render();
+                })
+                
+            },
+            canvas_size: [450, 450],
+            choices: 'NO_KEYS',
+            trial_duration: 200000
+        };
+        timeline.push(trial_anim);
+
+        jsPsych.run(timeline)
+    </script>
