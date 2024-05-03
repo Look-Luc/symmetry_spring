@@ -30,24 +30,12 @@
         var trial_anim = {
             type: jsPsychCanvasKeyboardResponse,
             stimulus: function dummy_function(c) {
-                function startSineTone() {
-                    osc.start(0);
-                // osc.stop(ctxAudio.currentTime + duration);
-                }
-
-                function stopSineTone() {
-                    gain.gain.setValueAtTime(gain.gain.value, ctxAudio.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(
-                        0.0000001, ctxAudio.currentTime + soundRampDown/1000
-                    );
-                    osc.stop(ctxAudio.currentTime + soundRampDown/1000);
-                }
                 var ctx = c.getContext("2d");        
                 // try to make a shape show up on screen
-                ctx.beginPath();
-                ctx.moveTo(0,50)
-                ctx.rect(0,0,450/3,450/3);
-                ctx.stroke();
+                // ctx.beginPath();
+                // ctx.moveTo(0,50)
+                // ctx.rect(0,0,450/3,450/3);
+                // ctx.stroke();
                 var count = 0;
                 // next try to *animate* a rectangle moving
                 $(function(){
@@ -55,17 +43,32 @@
                     ctx.fillStyle = colors[Math.floor(Math.random()*colors.length)];
                     var x = 0;
                     function render(){
-                        ctx.strokeRect(500,500, c.width, c.height)
-                        ctx.clearRect(0,0,c.width,c.height)
                         ctx.beginPath()
+                        ctx.arc(c.width/2, c.height/2, 1, 0, 2 * Math.PI);
+                        ctx.clearRect(0,0,c.width,c.height)
+                        ctx.strokeRect(500,500, c.width, c.height)
+                        var move = x
                         ctx.moveTo(x,0)
                         ctx.rect(0,0,500,500)
                         ctx.fillRect(0+x,200,450/4,450/4)
-                        ctx.fillRect(400-x, 200, 450/4,450/4)
+                        ctx.fillRect(375-x, 200, 450/4,450/4)
                         ctx.stroke()
                         x+=5
                         if(x > c.width+70){
                             x = -100
+                        }
+                        if(move === (c.width/2)+5){
+                            var context = new AudioContext();
+                            var oscillator = context.createOscillator();
+                            oscillator.type = "sine";
+                            oscillator.frequency.value = 800;
+                            oscillator.connect(context.destination);
+                            oscillator.start();
+                            // Beep for 500 milliseconds
+                            setTimeout(function () {
+                                oscillator.stop();
+                            }, 100);
+                            console.log("beep")
                         }
                         requestAnimationFrame(render);
                     }
