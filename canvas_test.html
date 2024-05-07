@@ -38,11 +38,28 @@
                 // ctx.stroke();
                 var count = 0;
                 // next try to *animate* a rectangle moving
+                function prepSound() {
+                    osc = ctxAudio.createOscillator();
+                    osc.frequency.value = freq;
+                    gain = ctxAudio.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctxAudio.destination);
+                }
+                function startSineTone() {
+                    osc.start(0);
+                    // osc.stop(ctxAudio.currentTime + duration);
+                }
+
                 $(function(){
+                    prepSound()
                     var colors = ["blue", "red", "green", "black"]
                     ctx.fillStyle = colors[Math.floor(Math.random()*colors.length)];
                     var x = 0;
                     function render(){
+                        if(move === (c.height/4)){
+                            startSineTone()
+                            console.log("beep")
+                        }
                         ctx.beginPath()
                         ctx.arc(c.width/2, c.height/2, 1, 0, 2 * Math.PI);
                         ctx.clearRect(0,0,c.width,c.height)
@@ -56,19 +73,6 @@
                         x+=5
                         if(x > c.width+70){
                             x = -100
-                        }
-                        if(move === (c.width/2)+5){
-                            var context = new AudioContext();
-                            var oscillator = context.createOscillator();
-                            oscillator.type = "sine";
-                            oscillator.frequency.value = 800;
-                            oscillator.connect(context.destination);
-                            oscillator.start();
-                            // Beep for 500 milliseconds
-                            setTimeout(function () {
-                                oscillator.stop();
-                            }, 100);
-                            console.log("beep")
                         }
                         requestAnimationFrame(render);
                     }
