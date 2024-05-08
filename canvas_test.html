@@ -2,6 +2,7 @@
 <html>
     <head>
         <title>Visual Association</title>
+        <!-- <iframe src="https://cross-origin.com/myvideo.html" allow="autoplay"></iframe> -->
         <script src="jspsych/dist/jspsych.js"></script>
         <script src="jspsych/dist/plugin-html-keyboard-response.js"></script>
         <script src="jspsych/dist/plugin-html-button-response.js"></script>
@@ -20,69 +21,124 @@
     <body></body>
     <canvas id="myCanvas" width="450" height="450"></canvas>
     <script>
+        var ctxAudio;
+        var osc;
+        var gain;
+        var soundStarted = false;
+
+        var AudioContext = window.AudioContext || window.webkitAudioContext || false;
+
+        var freq = 440;
+        var t_sound;
+        var soundOn = false;
+        var soundRampDown = 20; // ms for sound ramp down
+        var soundDuration = 100;
         var jsPsych = initJsPsych({
             show_progress_bar: false,
             override_safe_mode: true
         });
+
+        function prepSound() {
+            osc = ctxAudio.createOscillator();
+            osc.frequency.value = freq;
+            gain = ctxAudio.createGain();
+            osc.connect(gain);
+            gain.connect(ctxAudio.destination);
+        }
+        function startSineTone() {
+            osc.start(0);
+            t_sound = 0;
+            //osc.stop(ctxAudio.currentTime + soundDuration);
+        }
+
+
+        function ClickedConsent() {
+            startStudyTimestamp_unix = new Date().getTime(); // unix epoch timestamp (i.e. date/time)
+            startStudyTime = currentTime(); // current time (in browser time)
+
+            // audio context (must be created after a user interacts with the page)
+            if (AudioContext) {
+                ctxAudio = new AudioContext();
+            } else {
+                // Web Audio API is not supported
+                // Alert the user
+                alert("Sorry, but the Web Audio API is not supported by your browser. Please consider upgrading to the latest version or downloading Google Chrome or Mozilla Firefox.");
+            }
+        }
+
+        function stopSineTone() {
+            gain.gain.setValueAtTime(gain.gain.value, ctxAudio.currentTime);
+            gain.gain.exponentialRampToValueAtTime(
+                0.0000001, ctxAudio.currentTime + soundRampDown/1000
+            );
+            osc.stop(ctxAudio.currentTime + soundRampDown/1000);
+        }
+
         var timeline = [];
 
         var c = document.getElementById("myCanvas");
         var trial_anim = {
             type: jsPsychCanvasKeyboardResponse,
             stimulus: function dummy_function(c) {
-                var ctx = c.getContext("2d");        
-                // try to make a shape show up on screen
-                // ctx.beginPath();
-                // ctx.moveTo(0,50)
-                // ctx.rect(0,0,450/3,450/3);
-                // ctx.stroke();
-                var count = 0;
+                var ctx = c.getContext("2d");
+                ClickedConsent()
+                prepSound()
+                var rect1 = {
+                    x:0,
+                    y:200,
+                    width: 450/4,
+                    height: 450/4,
+                    directionX: 3
+                }
+                var rect2 = {
+                    x:388,
+                    y:200,
+                    width: 450/4,
+                    height: 450/4,
+                    directionX: -3
+                }
+                var rects = [rect1, rect2];
+                var colors = ["blue", "red", "green", "black"]
+                ctx.fillStyle = colors[Math.floor(Math.random()*colors.length)];
                 // next try to *animate* a rectangle moving
-                function prepSound() {
-                    osc = ctxAudio.createOscillator();
-                    osc.frequency.value = freq;
-                    gain = ctxAudio.createGain();
-                    osc.connect(gain);
-                    gain.connect(ctxAudio.destination);
-                }
-                function startSineTone() {
-                    osc.start(0);
-                    // osc.stop(ctxAudio.currentTime + duration);
-                }
-
                 $(function(){
-                    prepSound()
-                    var colors = ["blue", "red", "green", "black"]
-                    ctx.fillStyle = colors[Math.floor(Math.random()*colors.length)];
-                    var x = 0;
-                    function render(){
-                        if(move === (c.height/4)){
-                            startSineTone()
-                            console.log("beep")
+                    t_sound = 0
+                    requestAnimationFrame(animate);
+                    function animate(time){
+                        for(var i=0;i<rects.length;i++){
+                            rects[i].x+=rects[i].directionX;
+                            if(rects[0].x == c.width/2 & soundOn == false){
+                                startSineTone()
+                                soundOn = true;
+                                console.log("beep")
+                            }
+                            if(soundOn == true & rects[0].x > c.width/2){
+                                t_sound++;
+                                stopSineTone();
+                                soundOn = false;
+                            }
                         }
-                        ctx.beginPath()
-                        ctx.arc(c.width/2, c.height/2, 1, 0, 2 * Math.PI);
-                        ctx.clearRect(0,0,c.width,c.height)
-                        ctx.strokeRect(500,500, c.width, c.height)
-                        var move = x
-                        ctx.moveTo(x,0)
-                        ctx.rect(0,0,500,500)
-                        ctx.fillRect(0+x,200,450/4,450/4)
-                        ctx.fillRect(375-x, 200, 450/4,450/4)
-                        ctx.stroke()
-                        x+=5
-                        if(x > c.width+70){
-                            x = -100
+                    
+                        draw();
+                        requestAnimationFrame(animate);
+                        function draw(){
+                            ctx.beginPath()
+                            ctx.clearRect(0,0,c.width,c.height)
+                            ctx.strokeRect(500,500, c.width, c.height)
+                            ctx.moveTo(0,0)
+                            ctx.rect(0,0,500,500)
+                            
+                            for(var i = 0; i< rects.length; i++){
+                                var temp = rects[i]
+                                ctx.fillRect(temp.x, temp.y, temp.width, temp.height)
+                            }
+                            ctx.stroke()
                         }
-                        requestAnimationFrame(render);
                     }
-                    render();
                 })
                 
             },
-            //canvas_size: [450, 450],
-            choices: 'NO_KEYS',
-            trial_duration: 200000
+            choices: 'NO_KEYS'
         };
         timeline.push(trial_anim);
 
