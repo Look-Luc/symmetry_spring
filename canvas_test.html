@@ -77,12 +77,21 @@
         var timeline = [];
 
         var c = document.getElementById("myCanvas");
+
+        var instructions = {
+            type: jsPsychInstructions,
+            pages: [
+                "Welcome, this is a test for the beep"
+            ],
+            show_clickable_nav: true
+        }
+        timeline.push(instructions)
+
         var trial_anim = {
             type: jsPsychCanvasKeyboardResponse,
             stimulus: function dummy_function(c) {
                 var ctx = c.getContext("2d");
-                ClickedConsent()
-                prepSound()
+                
                 var rect1 = {
                     x:0,
                     y:200,
@@ -101,24 +110,16 @@
                 var colors = ["blue", "red", "green", "black"]
                 ctx.fillStyle = colors[Math.floor(Math.random()*colors.length)];
                 // next try to *animate* a rectangle moving
+                ClickedConsent()
+                
                 $(function(){
+                    prepSound()
                     t_sound = 0
                     requestAnimationFrame(animate);
                     function animate(time){
                         for(var i=0;i<rects.length;i++){
                             rects[i].x+=rects[i].directionX;
-                            if(rects[0].x == c.width/2 & soundOn == false){
-                                startSineTone()
-                                soundOn = true;
-                                console.log("beep")
-                            }
-                            if(soundOn == true & rects[0].x > c.width/2){
-                                t_sound++;
-                                stopSineTone();
-                                soundOn = false;
-                            }
                         }
-                    
                         draw();
                         requestAnimationFrame(animate);
                         function draw(){
@@ -131,7 +132,18 @@
                             for(var i = 0; i< rects.length; i++){
                                 var temp = rects[i]
                                 ctx.fillRect(temp.x, temp.y, temp.width, temp.height)
+
+                                if(rects[i].x == c.width/2 & soundOn == false){
+                                    startSineTone()
+                                    soundOn = true;
+                                    console.log("beep")
+                                }
+                                if(soundOn == true & rects[i].x > c.width/3+10){
+                                    stopSineTone();
+                                    soundOn = false;
+                                }
                             }
+                            
                             ctx.stroke()
                         }
                     }
