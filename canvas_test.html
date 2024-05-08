@@ -2,7 +2,6 @@
 <html>
     <head>
         <title>Visual Association</title>
-        <!-- <iframe src="https://cross-origin.com/myvideo.html" allow="autoplay"></iframe> -->
         <script src="jspsych/dist/jspsych.js"></script>
         <script src="jspsych/dist/plugin-html-keyboard-response.js"></script>
         <script src="jspsych/dist/plugin-html-button-response.js"></script>
@@ -150,8 +149,9 @@
                 })
                 
             },
-            choices: 'NO_KEYS'
-        };
+            prompt: "<p>Bounce (F) or Stream (J)</p>",
+            choices: ['f', 'j']
+        }
         timeline.push(trial_anim);
 
         jsPsych.run(timeline)
