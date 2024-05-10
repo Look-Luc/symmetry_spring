@@ -17,12 +17,61 @@
         <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css">
     </head>
     <body></body>
+    <canvas id="myCanvas" width="450" height="450"></canvas>
     <script>
+        var ctxAudio;
+        var osc;
+        var gain;
+        var AudioContext = window.AudioContext || window.webkitAudioContext || false;
+        var freq = 440;
+        var t_sound;
+        var soundOn = false;
+        var soundRampDown = 20; // ms for sound ramp down
+        var soundDuration = 100;
+
         var jsPsych = initJsPsych({
-            show_progress_bar: true
-            //override_safe_mode: true
+            show_progress_bar: true,
+            override_safe_mode: true
         });
+
+        function prepSound() {
+            osc = ctxAudio.createOscillator();
+            osc.frequency.value = freq;
+            gain = ctxAudio.createGain();
+            osc.connect(gain);
+            gain.connect(ctxAudio.destination);
+        }
+        function startSineTone() {
+            osc.start(0);
+            t_sound = 0;
+            //osc.stop(ctxAudio.currentTime + soundDuration);
+        }
+
+
+        function ClickedConsent() {
+            startStudyTimestamp_unix = new Date().getTime(); // unix epoch timestamp (i.e. date/time)
+            startStudyTime = currentTime(); // current time (in browser time)
+
+            // audio context (must be created after a user interacts with the page)
+            if (AudioContext) {
+                ctxAudio = new AudioContext();
+            } else {
+                // Web Audio API is not supported
+                // Alert the user
+                alert("Sorry, but the Web Audio API is not supported by your browser. Please consider upgrading to the latest version or downloading Google Chrome or Mozilla Firefox.");
+            }
+        }
+
+        function stopSineTone() {
+            gain.gain.setValueAtTime(gain.gain.value, ctxAudio.currentTime);
+            gain.gain.exponentialRampToValueAtTime(
+                0.0000001, ctxAudio.currentTime + soundRampDown/1000
+            );
+            osc.stop(ctxAudio.currentTime + soundRampDown/1000);
+        }
+
         var timeline = [];
+        var c = document.getElementById("myCanvas");
 
         //Start of Experiment
         var check_consent = function(elem) {
@@ -129,6 +178,143 @@
                 outDir: outDir
             });
         }
+
+        var fixation = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: '<div style="font-size:60px;">+</div>',
+            choices: "NO_KEYS",
+            trial_duration: 1000,
+        }
+
+        var trial_anim = {
+            type: jsPsychCanvasKeyboardResponse,
+            stimulus: function dummy_function(c) {
+                var ctx = c.getContext("2d");
+                
+                var rect1 = {
+                    x0:0,
+                    x:0,
+                    y:200,
+                    width: 450/8,
+                    height: 450/8,
+                    directionX: 0.25,
+                }
+                var rect2 = {
+                    x0:c.width-450/8,
+                    x:c.width-450/8,
+                    y:200,
+                    width: 450/8,
+                    height: 450/8,
+                    directionX: -0.25
+                }
+                var rects = [rect1, rect2];
+
+                var circ1 = {
+                    x0:0,
+                    x:0,
+                    y:200,
+                    width: 450/16,
+                    sAngle: 0,
+                    eAngle: 2*Math.PI,
+                    directionX: 0.25
+                }
+                var circ2 = {
+                    x0:c.width,
+                    x:c.width,
+                    y:200,
+                    width: 450/16,
+                    sAngle: 0,
+                    eAngle: 2*Math.PI,
+                    directionX: -0.25
+                }
+                circles = [circ1, circ2]
+
+                var isCirc = [true, false]
+
+                var T0 = performance.now()
+                var colors = ["blue", "red", "green", "black"]
+                var color = colors[Math.floor(Math.random()*colors.length)];
+                var playCirc = isCirc[Math.floor(Math.random()*isCirc.length)]
+                // next try to *animate* a rectangle moving
+                ClickedConsent()
+                $(function(){
+                    prepSound()
+                    requestAnimationFrame(animate);
+                    function animate(time){
+                        if(playCirc == false){
+                            for(var i=0;i<rects.length;i++){
+                                rects[i].x = rects[i].x0 + rects[i].directionX * (performance.now()-T0);
+                            }
+                        }
+                        else{
+                            for(var i=0;i<circles.length;i++){
+                                circles[i].x = circles[i].x0 + circles[i].directionX * (performance.now()-T0);
+                            }
+                        }
+                        draw();
+                        requestAnimationFrame(animate);
+                        function draw(){
+                            ctx.beginPath()
+                            ctx.clearRect(0,0,c.width,c.height)
+                            ctx.strokeRect(0,0, c.width, c.height)
+                            
+                            if(playCirc == false){
+                                ctx.fillStyle = color
+                                for(var i = 0; i < rects.length; i++){
+                                    var temp = rects[i]
+                                    ctx.fillRect(temp.x, temp.y, temp.width, temp.height)
+
+                                    if(rects[0].x >= (c.width-rects[0])/2 & rects[1] <= (c.width-rects[0])/2 & soundOn == false){
+                                        startSineTone()
+                                        soundOn = true;
+                                        meet = true
+                                        console.log("beep")
+                                    }
+                                    if(soundOn & meet){
+                                        stopSineTone();
+                                        soundOn = false;
+                                        meet == false
+                                    }
+                                }
+                                ctx.stroke()
+                            }
+                            else{
+                                for(var i = 0; i < circles.length; i++){
+                                    var temp = circles[i]
+                                    ctx.fillStyle = color
+                                    ctx.lineWidth = 1;
+                                    ctx.strokeStyle = colors
+                                    ctx.moveTo(temp.x+temp.width, temp.y)
+                                    ctx.arc(temp.x, temp.y, temp.width, temp.sAngle, temp.eAngle)
+                                    ctx.fill()
+                                    
+                                    if(circles[0].x >= (c.width-circles[0])/2 & circles[1] <= (c.width-circles[0])/2 & soundOn == false){
+                                        startSineTone()
+                                        soundOn = true;
+                                        meet = true
+                                        console.log("beep")
+                                    }
+                                    if(soundOn & meet){
+                                        stopSineTone();
+                                        soundOn = false;
+                                        meet == false
+                                    }
+                                }
+                                ctx.stroke()
+                            }
+                        }
+                    }
+                })
+            },
+            prompt: "<p>Bounce (F) or Stream (J)</p>",
+            choices: ['f', 'j']
+        }
+
+        var test_procedure = {
+            timeline: [fixation, trial_anim, fixation, trial_anim],
+            repetitions: 2
+        };
+
         // timeline.push(submitData('./data'))
         //----------------------------------------------------------------------------------//
         // HEADPHONE CHECK STIMULI WITH METADATA
@@ -260,6 +446,7 @@
                 headphone_check_pass, 
                 instructions, 
                 instructions,
+                test_procedure,
                 questionary,
                 open_ended,
                 final_trial
@@ -279,6 +466,7 @@
                 //instructions, 
                 consentForm,
                 instructions,
+                test_procedure,
                 questionary,
                 open_ended,
                 final_trial],
@@ -328,6 +516,7 @@
                 headphone_check_loop,
                 hc_pass_failed_hc,
                 instructions,
+                test_procedure,
                 questionary,
                 open_ended,
                 final_trial,

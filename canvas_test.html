@@ -23,13 +23,13 @@
         var ctxAudio;
         var osc;
         var gain;
-        var soundStarted = false;
 
         var AudioContext = window.AudioContext || window.webkitAudioContext || false;
 
         var freq = 440;
         var t_sound;
         var soundOn = false;
+        var meet = false
         var soundRampDown = 20; // ms for sound ramp down
         var soundDuration = 100;
         var jsPsych = initJsPsych({
@@ -46,10 +46,8 @@
         }
         function startSineTone() {
             osc.start(0);
-            t_sound = 0;
             //osc.stop(ctxAudio.currentTime + soundDuration);
         }
-
 
         function ClickedConsent() {
             startStudyTimestamp_unix = new Date().getTime(); // unix epoch timestamp (i.e. date/time)
@@ -92,66 +90,125 @@
                 var ctx = c.getContext("2d");
                 
                 var rect1 = {
+                    x0:0,
                     x:0,
                     y:200,
-                    width: 450/4,
-                    height: 450/4,
-                    directionX: 3
+                    width: 450/8,
+                    height: 450/8,
+                    directionX: 0.25,
                 }
                 var rect2 = {
-                    x:388,
+                    x0:c.width-450/8,
+                    x:c.width-450/8,
                     y:200,
-                    width: 450/4,
-                    height: 450/4,
-                    directionX: -3
+                    width: 450/8,
+                    height: 450/8,
+                    directionX: -0.25
                 }
                 var rects = [rect1, rect2];
+
+                var circ1 = {
+                    x0:0,
+                    x:0,
+                    y:200,
+                    width: 450/16,
+                    sAngle: 0,
+                    eAngle: 2*Math.PI,
+                    directionX: 0.25
+                }
+                var circ2 = {
+                    x0:c.width,
+                    x:c.width,
+                    y:200,
+                    width: 450/16,
+                    sAngle: 0,
+                    eAngle: 2*Math.PI,
+                    directionX: -0.25
+                }
+                circles = [circ1, circ2]
+
+                var isCirc = [true, false]
+
+                var T0 = performance.now()
                 var colors = ["blue", "red", "green", "black"]
-                ctx.fillStyle = colors[Math.floor(Math.random()*colors.length)];
+                var color = colors[Math.floor(Math.random()*colors.length)];
+                var playCirc = isCirc[Math.floor(Math.random()*isCirc.length)]
                 // next try to *animate* a rectangle moving
                 ClickedConsent()
-                
                 $(function(){
                     prepSound()
-                    t_sound = 0
                     requestAnimationFrame(animate);
                     function animate(time){
-                        for(var i=0;i<rects.length;i++){
-                            rects[i].x+=rects[i].directionX;
+                        if(playCirc == false){
+                            for(var i=0;i<rects.length;i++){
+                                rects[i].x = rects[i].x0 + rects[i].directionX * (performance.now()-T0);
+                            }
+                        }
+                        else{
+                            for(var i=0;i<circles.length;i++){
+                                circles[i].x = circles[i].x0 + circles[i].directionX * (performance.now()-T0);
+                            }
                         }
                         draw();
                         requestAnimationFrame(animate);
                         function draw(){
                             ctx.beginPath()
                             ctx.clearRect(0,0,c.width,c.height)
-                            ctx.strokeRect(500,500, c.width, c.height)
-                            ctx.moveTo(0,0)
-                            ctx.rect(0,0,500,500)
+                            ctx.strokeRect(0,0, c.width, c.height)
+                            //ctx.moveTo(50,50)
                             
-                            for(var i = 0; i< rects.length; i++){
-                                var temp = rects[i]
-                                ctx.fillRect(temp.x, temp.y, temp.width, temp.height)
+                            if(playCirc == false){
+                                ctx.fillStyle = color
+                                for(var i = 0; i < rects.length; i++){
+                                    var temp = rects[i]
+                                    ctx.fillRect(temp.x, temp.y, temp.width, temp.height)
 
-                                if(rects[i].x == c.width/2 & soundOn == false){
-                                    startSineTone()
-                                    soundOn = true;
-                                    console.log("beep")
+                                    if(rects[0].x >= (c.width-rects[0])/2 & rects[1] <= (c.width-rects[0])/2 & soundOn == false){
+                                        startSineTone()
+                                        soundOn = true;
+                                        meet = true
+                                        console.log("beep")
+                                    }
+                                    if(soundOn & meet){
+                                        stopSineTone();
+                                        soundOn = false;
+                                        meet == false
+                                    }
                                 }
-                                if(soundOn == true & rects[i].x > c.width/3+10){
-                                    stopSineTone();
-                                    soundOn = false;
-                                }
+                                ctx.stroke()
                             }
-                            
-                            ctx.stroke()
+                            else{
+                                for(var i = 0; i < circles.length; i++){
+                                    var temp = circles[i]
+                                    ctx.fillStyle = color
+                                    ctx.lineWidth = 1;
+                                    ctx.strokeStyle = colors
+                                    ctx.moveTo(temp.x+temp.width, temp.y)
+                                    ctx.arc(temp.x, temp.y, temp.width, temp.sAngle, temp.eAngle)
+                                    ctx.fill()
+                                    
+                                    if(circles[0].x >= (c.width-circles[0])/2 & circles[1] <= (c.width-circles[0])/2 & soundOn == false){
+                                        startSineTone()
+                                        soundOn = true;
+                                        meet = true
+                                        console.log("beep")
+                                    }
+                                    if(soundOn & meet){
+                                        stopSineTone();
+                                        soundOn = false;
+                                        meet == false
+                                    }
+                                }
+                                ctx.stroke()
+                            }
                         }
                     }
                 })
-                
             },
             prompt: "<p>Bounce (F) or Stream (J)</p>",
             choices: ['f', 'j']
         }
+
         timeline.push(trial_anim);
 
         jsPsych.run(timeline)
