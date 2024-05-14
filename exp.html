@@ -14,6 +14,7 @@
         <script src="jspsych/dist/plugin-canvas-keyboard-response.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
         <script src="helper_files/mturkfunctions.js"></script>
+        <script src="animation.js"></script>
         <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css">
     </head>
     <body></body>
@@ -296,6 +297,7 @@
                                     }
                                     beepCount++
                                 }
+                                console.log(beepCount)
                                 //ctx.stroke()
                             }
                             else{
@@ -339,7 +341,7 @@
 
         var test_procedure = {
             timeline: [fixation, trial_anim, fixation, trial_anim],
-            repetitions: 2,
+            repetitions: 24,
         };
 
         //----------------------------------------------------------------------------------//
