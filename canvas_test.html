@@ -128,14 +128,21 @@
                 circles = [circ1, circ2]
 
                 var isCirc = [true, false]
+                
+                function stopS(){
+                    stopSineTone();
+                    soundOn = false;
+                    meet == false
+                }
 
                 var T0 = performance.now()
                 var colors = ["blue", "red", "green", "black"]
                 var color = colors[Math.floor(Math.random()*colors.length)];
                 var playCirc = isCirc[Math.floor(Math.random()*isCirc.length)]
-                // next try to *animate* a rectangle moving
-                ClickedConsent()
+                var count
+                // next try to *animate* a rectangle moving.
                 $(function(){
+                    ClickedConsent()
                     prepSound()
                     requestAnimationFrame(animate);
                     function animate(time){
@@ -162,44 +169,45 @@
                                 for(var i = 0; i < rects.length; i++){
                                     var temp = rects[i]
                                     ctx.fillRect(temp.x, temp.y, temp.width, temp.height)
-
-                                    if(rects[0].x >= (c.width-rects[0])/2 & rects[1] <= (c.width-rects[0])/2 & soundOn == false){
-                                        startSineTone()
-                                        soundOn = true;
-                                        meet = true
-                                        console.log("beep")
-                                    }
-                                    if(soundOn & meet){
-                                        stopSineTone();
-                                        soundOn = false;
-                                        meet == false
-                                    }
                                 }
-                                ctx.stroke()
+                                if(soundOn == false & rects[0].x >= (c.width-rects[0].width)/2 & rects[1].x <= (c.width-rects[1].width)/2 & count == undefined){
+                                    count = 0;
+                                    startSineTone()
+                                    soundOn = true;
+                                    meet = true
+                                    console.log("beep")
+                                }
+                                if(soundOn & meet){
+                                    setTimeout(function(){
+                                        //do what you need here
+                                        stopS()
+                                    }, 100);
+                                }
+                                
+                                //ctx.stroke()
                             }
                             else{
                                 for(var i = 0; i < circles.length; i++){
                                     var temp = circles[i]
                                     ctx.fillStyle = color
-                                    ctx.lineWidth = 1;
                                     ctx.strokeStyle = colors
                                     ctx.moveTo(temp.x+temp.width, temp.y)
                                     ctx.arc(temp.x, temp.y, temp.width, temp.sAngle, temp.eAngle)
                                     ctx.fill()
-                                    
-                                    if(circles[0].x >= (c.width-circles[0])/2 & circles[1] <= (c.width-circles[0])/2 & soundOn == false){
-                                        startSineTone()
-                                        soundOn = true;
-                                        meet = true
-                                        console.log("beep")
-                                    }
-                                    if(soundOn & meet){
-                                        stopSineTone();
-                                        soundOn = false;
-                                        meet == false
-                                    }
                                 }
-                                ctx.stroke()
+                                if(soundOn == false & circles[0].x >= (c.width-circles[0].width)/2 & circles[1] <=(c.width-circles[1].width)/2){
+                                    startSineTone()
+                                    soundOn = true;
+                                    meet = true
+                                    console.log("beep")
+                                }
+                                console.log("after startSineTone")
+                                if(soundOn & meet & circles[0].x >= (c.width-circles[0].width) & circles[1] <=(c.width-circles[1].width)){
+                                    stopSineTone();
+                                    soundOn = false;
+                                    meet == false
+                                }
+                                //ctx.stroke()
                             }
                         }
                     }

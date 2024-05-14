@@ -11,9 +11,9 @@
         <script src="jspsych/dist/plugin-survey-text.js"></script>
         <script src="jspsych/dist/plugin-instructions.js"></script>
         <script src="jspsych/dist/plugin-audio-button-response.js"></script>
+        <script src="jspsych/dist/plugin-canvas-keyboard-response.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
         <script src="helper_files/mturkfunctions.js"></script>
-        <script src="animation.js"></script>
         <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css">
     </head>
     <body></body>
@@ -22,15 +22,27 @@
         var ctxAudio;
         var osc;
         var gain;
-        var AudioContext = window.AudioContext || window.webkitAudioContext || false;
+        var AudioContext = window.AudioContext || window.webkitAudioContext || true;
         var freq = 440;
         var t_sound;
         var soundOn = false;
+        var meet = false
         var soundRampDown = 20; // ms for sound ramp down
         var soundDuration = 100;
 
+        function getSONAInfo() {
+        let urlParams = new URLSearchParams(window.location.search);
+        SONAID = urlParams.get("survey_code");
+        if (SONAID == null) {
+            SONAID = 'NO-SUBJ-ID';
+        }
+        return SONAID;
+        }
+
+        var subjectID = getSONAInfo();
+
         var jsPsych = initJsPsych({
-            show_progress_bar: true,
+            show_progress_bar: false,
             override_safe_mode: true
         });
 
@@ -43,8 +55,6 @@
         }
         function startSineTone() {
             osc.start(0);
-            t_sound = 0;
-            //osc.stop(ctxAudio.currentTime + soundDuration);
         }
 
 
@@ -91,7 +101,7 @@
             cont_btn: "start",
             check_fn: check_consent
         };
-        //timeline.push(consentForm);
+        timeline.push(consentForm);
 
         var instructions = {
             type: jsPsychInstructions,
@@ -108,7 +118,6 @@
             ],
             show_clickable_nav: true
         }
-        //timeline.push(instructions);
 
         var questionary = {
             type: jsPsychSurveyMultiChoice,
@@ -136,7 +145,6 @@
                 }
             ],
         }
-        //timeline.push(questionary);
 
         var open_ended = {
             type: jsPsychSurveyText,
@@ -158,7 +166,6 @@
                 }
             ]
         }
-        //timeline.push(open_ended);
 
         var final_trial = {
             type: jsPsychHtmlKeyboardResponse,
@@ -170,7 +177,7 @@
 
         function submitData(outDir) {
             // get data string from response array
-            var dataString = JSON.stringify(responses);
+            var dataString = JSON.stringify(jsPsych.data.get().filter({task: 'response'}));
             // post response to server
             $.post("helper_files/logTrial.py", {
                 subjectID: subjectID,
@@ -185,12 +192,11 @@
             choices: "NO_KEYS",
             trial_duration: 1000,
         }
-
+        var beepCount = 0
         var trial_anim = {
             type: jsPsychCanvasKeyboardResponse,
             stimulus: function dummy_function(c) {
                 var ctx = c.getContext("2d");
-                
                 var rect1 = {
                     x0:0,
                     x:0,
@@ -230,6 +236,14 @@
                 circles = [circ1, circ2]
 
                 var isCirc = [true, false]
+                var isBeep = [true, false]
+                var hasBeep = isBeep[Math.floor(Math.random()*isBeep.length)]
+
+                function stopS(){
+                    stopSineTone();
+                    soundOn = false;
+                    meet == false
+                }
 
                 var T0 = performance.now()
                 var colors = ["blue", "red", "green", "black"]
@@ -237,6 +251,7 @@
                 var playCirc = isCirc[Math.floor(Math.random()*isCirc.length)]
                 // next try to *animate* a rectangle moving
                 ClickedConsent()
+                var count
                 $(function(){
                     prepSound()
                     requestAnimationFrame(animate);
@@ -257,26 +272,31 @@
                             ctx.beginPath()
                             ctx.clearRect(0,0,c.width,c.height)
                             ctx.strokeRect(0,0, c.width, c.height)
+                            //ctx.moveTo(50,50)
                             
                             if(playCirc == false){
                                 ctx.fillStyle = color
                                 for(var i = 0; i < rects.length; i++){
                                     var temp = rects[i]
                                     ctx.fillRect(temp.x, temp.y, temp.width, temp.height)
-
-                                    if(rects[0].x >= (c.width-rects[0])/2 & rects[1] <= (c.width-rects[0])/2 & soundOn == false){
+                                }
+                                if(isBeep & beepCount <= 24){
+                                    if(soundOn == false & rects[0].x >= (c.width-rects[0].width)/2 & rects[1].x <= (c.width-rects[1].width)/2 & count == undefined){
+                                        count = 0;
                                         startSineTone()
                                         soundOn = true;
                                         meet = true
                                         console.log("beep")
                                     }
                                     if(soundOn & meet){
-                                        stopSineTone();
-                                        soundOn = false;
-                                        meet == false
+                                        setTimeout(function(){
+                                            //do what you need here
+                                            stopS()
+                                        }, 100);
                                     }
+                                    beepCount++
                                 }
-                                ctx.stroke()
+                                //ctx.stroke()
                             }
                             else{
                                 for(var i = 0; i < circles.length; i++){
@@ -287,35 +307,41 @@
                                     ctx.moveTo(temp.x+temp.width, temp.y)
                                     ctx.arc(temp.x, temp.y, temp.width, temp.sAngle, temp.eAngle)
                                     ctx.fill()
-                                    
-                                    if(circles[0].x >= (c.width-circles[0])/2 & circles[1] <= (c.width-circles[0])/2 & soundOn == false){
+                                }
+                                if(isBeep & beepCount <= 24){
+                                    if(soundOn == false & circles[0].x >= (c.width-circles[0].width)/2 & circles[1].x <= (c.width-circles[1].width)/2 & count == undefined){
+                                        count = 0;
                                         startSineTone()
                                         soundOn = true;
                                         meet = true
                                         console.log("beep")
                                     }
                                     if(soundOn & meet){
-                                        stopSineTone();
-                                        soundOn = false;
-                                        meet == false
+                                        setTimeout(function(){
+                                            //do what you need here
+                                            stopS()
+                                        }, 100);
                                     }
+                                    beepCount++
                                 }
-                                ctx.stroke()
+                                //ctx.stroke()
                             }
                         }
                     }
                 })
             },
             prompt: "<p>Bounce (F) or Stream (J)</p>",
-            choices: ['f', 'j']
+            choices: ['f', 'j'],
+            data:{
+                task: 'response'
+            }
         }
 
         var test_procedure = {
             timeline: [fixation, trial_anim, fixation, trial_anim],
-            repetitions: 2
+            repetitions: 2,
         };
 
-        // timeline.push(submitData('./data'))
         //----------------------------------------------------------------------------------//
         // HEADPHONE CHECK STIMULI WITH METADATA
         //----------------------------------------------------------------------------------//
@@ -357,9 +383,6 @@
                 '<p>You passed the headphone check!</p>' +
                 '<p>Click <strong>Next</strong> to continue.</p>',
                 ],
-            on_start: function() {
-                jsPsych.setProgressBar(0.08);
-            },
         };
 
         //----------------------------------------------------------------------------------//
@@ -419,7 +442,7 @@
                 return (do_hc);
             }
         };
-        timeline.push(headphone_check_node)
+        //timeline.push(headphone_check_node)
 
         var headphone_check_loop = {
             timeline: [headphone_check_node, fail_options_node],
@@ -435,16 +458,15 @@
             }
 
         }
-        //timeline.push(headphone_check_loop);
+        timeline.push(headphone_check_loop);
 
         //----------------------------------------------------------------------------------//
         // HEADPHONE CHECK PROCEEDINGS **IF PASSED**
         //----------------------------------------------------------------------------------//
         var hc_pass = {
             timeline: [
-                consentForm,
+                //consentForm,
                 headphone_check_pass, 
-                instructions, 
                 instructions,
                 test_procedure,
                 questionary,
@@ -464,12 +486,14 @@
         var hc_pass_failed_hc = {
             timeline: [ 
                 //instructions, 
-                consentForm,
+                //consentForm,
                 instructions,
                 test_procedure,
                 questionary,
                 open_ended,
-                final_trial],
+                final_trial,
+                submitData('./helper_files/data')
+            ],
             conditional_function: function() {
                 return (fail_choice == 1);
             }
@@ -508,7 +532,7 @@
         
         var hc_fail = {
             timeline: [
-                consentForm,
+                //consentForm,
                 headphone_check_fail,
                 hc_round_2,
                 hc_pass,
@@ -520,7 +544,7 @@
                 questionary,
                 open_ended,
                 final_trial,
-                //submitData('./helper_files/data')
+                submitData('./data')
             ],
             on_start: function() {
                 do_hc = false;
@@ -536,5 +560,6 @@
         timeline.push(hc_fail);
 
         jsPsych.run(timeline);
+        console.log(jsPsych.data.get().filter({task: 'response'}))
     </script>
 </html>
