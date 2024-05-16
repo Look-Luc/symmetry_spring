@@ -178,7 +178,7 @@
 
         function submitData(outDir) {
             // get data string from response array
-            var dataString = JSON.stringify(jsPsych.data.get().filter({task: 'response'}));
+            var dataString = jsPsych.data.get().filter({task: 'response'});
             // post response to server
             $.post("helper_files/logTrial.py", {
                 subjectID: subjectID,
@@ -254,9 +254,9 @@
                 var color = colors[Math.floor(Math.random()*colors.length)];
                 var playCirc = isCirc[Math.floor(Math.random()*isCirc.length)]
                 // next try to *animate* a rectangle moving
+                var count
                 ClickedConsent()
                 $(function(){
-                    var count
                     prepSound()
                     requestAnimationFrame(animate);
                     function animate(time){
@@ -284,13 +284,14 @@
                                     var temp = rects[i]
                                     ctx.fillRect(temp.x, temp.y, temp.width, temp.height)
                                 }
-                                if(isBeep & beepCount <= 24){
+                                if(hasBeep & beepCount <= 24){
                                     if(soundOn == false & rects[0].x >= (c.width-rects[0].width)/2 & rects[1].x <= (c.width-rects[1].width)/2 & count == undefined){
                                         count = 0;
                                         startSineTone()
                                         soundOn = true;
                                         meet = true
                                         console.log("beep")
+                                        beepCount++
                                     }
                                     if(soundOn & meet){
                                         setTimeout(function(){
@@ -298,7 +299,6 @@
                                             stopS()
                                         }, 100);
                                     }
-                                    beepCount++
                                 }
                                 //ctx.stroke()
                             }
@@ -312,13 +312,14 @@
                                     ctx.arc(temp.x, temp.y, temp.width, temp.sAngle, temp.eAngle)
                                     ctx.fill()
                                 }
-                                if(isBeep & beepCount <= 24){
+                                if(hasBeep & beepCount <= 24){
                                     if(soundOn == false & circles[0].x >= (c.width-circles[0].width)/2 & circles[1].x <= (c.width-circles[1].width)/2 & count == undefined){
                                         count = 0;
                                         startSineTone()
                                         soundOn = true;
                                         meet = true
                                         console.log("beep")
+                                        beepCount++
                                     }
                                     if(soundOn & meet){
                                         setTimeout(function(){
@@ -326,8 +327,8 @@
                                             stopS()
                                         }, 100);
                                     }
-                                    beepCount++
                                 }
+                                console.log(beepCount)
                                 //ctx.stroke()
                             }
                         }
@@ -338,11 +339,14 @@
             choices: ['f', 'j'],
             data:{
                 task: 'response'
+            },
+            on_finish: function(data){
+                submitData('./helper_files/data')
             }
         }
 
         var test_procedure = {
-            timeline: [fixation, trial_anim],
+            timeline: [fixation, trial_anim, fixation, trial_anim],
             repetitions: 2,
         };
 
@@ -420,7 +424,7 @@
                 }
             }
         };
-        timeline.push(fail_options);
+        //timeline.push(fail_options);
 
         var fail_options_node = {
             timeline: [fail_options],
@@ -475,7 +479,8 @@
                 test_procedure,
                 questionary,
                 open_ended,
-                final_trial
+                final_trial,
+                //submitData('./helper_files/data')
                 ],
             conditional_function: function() {
                 correct_trials = jsPsych.data.get().last(6).filter({
@@ -496,7 +501,7 @@
                 questionary,
                 open_ended,
                 final_trial,
-                submitData('./data')
+                //submitData('./helper_files/data')
             ],
             conditional_function: function() {
                 return (fail_choice == 1);
@@ -548,7 +553,7 @@
                 questionary,
                 open_ended,
                 final_trial,
-                submitData('./data')
+                //submitData('./helper_files/data')
             ],
             on_start: function() {
                 do_hc = false;
